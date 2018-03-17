@@ -8,6 +8,14 @@
     <artifactId>ruleseeker</artifactId>
     <version>0.1.0</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>24.1-jre</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
