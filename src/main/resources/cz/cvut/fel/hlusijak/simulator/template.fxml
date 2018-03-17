@@ -9,13 +9,13 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-
 <SplitPane dividerPositions="0.6" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.cvut.fel.hlusijak.simulator.SimulatorController">
    <items>
-      <GridPane fx:id="viewGrid" />
+      <Pane fx:id="viewPane" />
       <VBox spacing="24.0">
          <children>
             <HBox alignment="TOP_CENTER" spacing="16.0">

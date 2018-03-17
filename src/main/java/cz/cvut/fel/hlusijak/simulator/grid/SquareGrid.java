@@ -1,61 +1,33 @@
 package cz.cvut.fel.hlusijak.simulator.grid;
 
-import com.google.common.base.Preconditions;
+import cz.cvut.fel.hlusijak.util.Vector2d;
 
 /**
  * A grid of squares.
  */
-public class SquareGrid implements Grid {
-    private final int width, height, size;
-    private final int[] states;
+public class SquareGrid extends AbstractRectangularGrid {
+    private final Vector2d vertexOffset;
+    private final double edgeLength;
 
     public SquareGrid(int width, int height) {
-        Preconditions.checkArgument(width > 0, "The width must be positive.");
-        Preconditions.checkArgument(height > 0, "The height must be positive.");
+        super(width, height);
 
-        this.width = width;
-        this.height = height;
-        this.size = width * height;
-        this.states = new int[size];
+        int max = Math.max(width, height);
+        Vector2d unitDims = new Vector2d(width, height).div(new Vector2d(max));
+        vertexOffset = Vector2d.ONE.sub(unitDims).div(2);
+        edgeLength = 1 / (double) max;
     }
 
-    private SquareGrid(int width, int height, int size) {
-        this.width = width;
-        this.height = height;
-        this.size = size;
-        this.states = new int[size];
-    }
+    private SquareGrid(int width, int height, int size, Vector2d vertexOffset, double edgeLength) {
+        super(width, height, size);
 
-    public int getTileIndex(int x, int y) {
-        return x + y * width;
+        this.vertexOffset = vertexOffset;
+        this.edgeLength = edgeLength;
     }
 
     @Override
     public int getNeighbourCount() {
         return 4;
-    }
-
-    @Override
-    public int getSize() {
-        return size;
-    }
-
-    @Override
-    public int getTileState(int tileIndex) {
-        return states[tileIndex];
-    }
-
-    @Override
-    public int setTileState(int tileIndex, int tileState) {
-        int tmp = states[tileIndex];
-        states[tileIndex] = tileState;
-
-        return tmp;
-    }
-
-    @Override
-    public void setTileStates(int tileIndexOffset, int[] tileStates) {
-        System.arraycopy(tileStates, 0, states, tileIndexOffset, tileStates.length);
     }
 
     @Override
@@ -70,8 +42,13 @@ public class SquareGrid implements Grid {
     }
 
     @Override
-    public SquareGrid clone() {
-        SquareGrid cloned = new SquareGrid(width, height, size);
+    public Vector2d[] getTileVertices(int tileIndex) {
+        return new Vector2d[0];
+    }
+
+    @Override
+    public SquareGrid copy() {
+        SquareGrid cloned = new SquareGrid(width, height, size, vertexOffset, edgeLength);
 
         System.arraycopy(this.states, 0, cloned.states, 0, size);
 

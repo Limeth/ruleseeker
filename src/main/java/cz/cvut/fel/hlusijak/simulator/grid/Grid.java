@@ -1,5 +1,7 @@
 package cz.cvut.fel.hlusijak.simulator.grid;
 
+import cz.cvut.fel.hlusijak.util.Vector2d;
+
 /**
  * Describes the geometric properties of the cells and stores their state
  */
@@ -45,6 +47,12 @@ public interface Grid {
     int getNeighbouringTileIndex(int tileIndex, int directionIndex);
 
     /**
+     * @param tileIndex The index of the tile to get the vertices of.
+     * @return The vertices of the tile, so all tiles fit in the unit square.
+     */
+    Vector2d[] getTileVertices(int tileIndex);
+
+    /**
      * @param tileIndex The index of the center tile.
      * @return An array of neighbouring tile indices in the order of directions.
      */
@@ -60,5 +68,12 @@ public interface Grid {
         return neighbouringIndices;
     }
 
-    Grid clone();
+    /**
+     * Thanks to the genius design decisions at Oracle, interfaces cannot have
+     * a {@code clone} method, because {@code clone} is implemented in
+     * {@link Object}, but {@link Object} does not implement this interface.
+     *
+     * @return A cloned instance of the implementation.
+     */
+    Grid copy();
 }
