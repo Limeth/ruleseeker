@@ -1,6 +1,7 @@
 package cz.cvut.fel.hlusijak.simulator;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +31,7 @@ public class Simulator {
     public synchronized Future<Integer> nextIteration() {
         final Grid currentGrid = grid;
         final RuleSet currentRuleSet = ruleSet;
-        final int taskCount = (int) Math.ceil((double) currentGrid.getSize() / (double) cellsPerTask);
+        final int taskCount = (int) Math.ceil((double) currentGrid.getGeometry().getSize() / (double) cellsPerTask);
         // Wow, Java, nice generics.
         //noinspection unchecked
         CompletableFuture<int[]>[] tasks = new CompletableFuture[taskCount];
@@ -40,7 +41,7 @@ public class Simulator {
             final int currentCellsPerTask;
 
             if (taskIndex >= taskCount - 1) {
-                currentCellsPerTask = taskCount * cellsPerTask - currentGrid.getSize();
+                currentCellsPerTask = taskCount * cellsPerTask - currentGrid.getGeometry().getSize();
             } else {
                 currentCellsPerTask = cellsPerTask;
             }
@@ -87,7 +88,7 @@ public class Simulator {
     }
 
     public synchronized Grid getGrid() {
-        return grid.copy();
+        return grid.clone();
     }
 
     public synchronized void setGrid(Grid grid) {

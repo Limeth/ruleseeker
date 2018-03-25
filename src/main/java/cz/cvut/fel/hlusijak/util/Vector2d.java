@@ -18,6 +18,14 @@ public class Vector2d {
         this(d, d);
     }
 
+    public static Vector2d of(double x, double y) {
+        return new Vector2d(x, y);
+    }
+
+    public static Vector2d of(double d) {
+        return new Vector2d(d);
+    }
+
     public Vector2d neg() {
         return new Vector2d(-x, -y);
     }
@@ -52,6 +60,14 @@ public class Vector2d {
 
     public Vector2d div(Vector2d other) {
         return new Vector2d(x / other.x, y / other.y);
+    }
+
+    public double min() {
+        return Math.min(x, y);
+    }
+
+    public double max() {
+        return Math.max(x, y);
     }
 
     public double normSquared() {
