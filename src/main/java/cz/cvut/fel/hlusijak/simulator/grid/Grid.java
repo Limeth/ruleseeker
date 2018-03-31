@@ -1,6 +1,9 @@
 package cz.cvut.fel.hlusijak.simulator.grid;
 
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+
+import java.util.Random;
 
 /**
  * Stores states of cells with properties defined by {@link GridGeometry}.
@@ -36,6 +39,14 @@ public class Grid {
         states[tileIndex] = tileState;
 
         return tmp;
+    }
+
+    public void randomizeTileStates(Random rng, RuleSet ruleSet) {
+        int numberOfStates = ruleSet.getNumberOfStates();
+
+        for (int i = 0; i < states.length; i++) {
+            states[i] = rng.nextInt(numberOfStates);
+        }
     }
 
     /**

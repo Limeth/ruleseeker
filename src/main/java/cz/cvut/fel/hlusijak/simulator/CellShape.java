@@ -17,7 +17,6 @@ public class CellShape extends Polygon {
             getPoints().addAll(vertex.getX(), vertex.getY());
         }
 
-        //getPoints().addAll(-50.0, 40.0, 50.0, 40.0, 0.0, -60.0);
         fillProperty().setValue(fill);
         setLayoutX(0);
         setLayoutY(0);

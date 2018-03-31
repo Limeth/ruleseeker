@@ -4,6 +4,8 @@ import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.util.Vector2d;
+import cz.cvut.fel.hlusijak.util.Wrapper;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -30,7 +32,17 @@ public class SimulatorController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        updateViewPane();
+        viewPane.layoutBoundsProperty()
+                .addListener(observable -> updateViewPane());
+
+
+        // Workaround for the previous listener not being triggered in the first frame
+        Wrapper<InvalidationListener> firstRenderListener = new Wrapper<>(null);
+        firstRenderListener.value = observable -> {
+            observable.removeListener(firstRenderListener.value);
+            updateViewPane();
+        };
+        viewPane.heightProperty().addListener(firstRenderListener.value);
     }
 
     private Paint getCellColor(int state) {
@@ -38,10 +50,10 @@ public class SimulatorController implements Initializable {
             return Color.WHITE;
         }
 
-        int states = RuleSeeker.getInstance().getSimulator().getRuleSet().getNumberOfStates();
-        state = state % states;
+        int remainingStates = RuleSeeker.getInstance().getSimulator().getRuleSet().getNumberOfStates() - 1;
+        state = state % remainingStates;
 
-        return Color.hsb(360.0 * state / (double) states, 1.0, 0.5);
+        return Color.hsb(360.0 * state / (double) remainingStates, 1.0, 0.75);
     }
 
     private Pair<Double, Vector2d> createTransformation() {

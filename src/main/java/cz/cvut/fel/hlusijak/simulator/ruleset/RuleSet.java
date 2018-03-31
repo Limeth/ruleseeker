@@ -2,6 +2,8 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 
+import java.util.Random;
+
 public interface RuleSet {
     /**
      * @return The number of states.
@@ -13,4 +15,32 @@ public interface RuleSet {
      * No writes to shared memory must occur in the implementation.
      */
     int getNextTileState(Grid grid, int tileIndex);
+
+    /**
+     * @return An array of next states where the index is a representation of
+     *         the tiles' surroundings.
+     */
+    int[] getRules();
+
+    /**
+     * @param rules An array of next states where the index is a representation of
+     *              the tiles' surroundings.
+     */
+    void setRules(int[] rules);
+
+    /**
+     * Assigns a random outcome state to each rule.
+     *
+     * @param rng The desired random number generator to generate the states with, in succession.
+     */
+    default void randomizeRules(Random rng) {
+        int numberOfStates = getNumberOfStates();
+        int[] rules = getRules();
+
+        for (int i = 0; i < rules.length; i++) {
+            rules[i] = rng.nextInt(numberOfStates);
+        }
+
+        setRules(rules);
+    }
 }

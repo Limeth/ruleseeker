@@ -43,18 +43,10 @@ public interface GridGeometry {
 
     /**
      * @param tileIndex The index of the center tile.
-     * @return An array of neighbouring tile indices in the order of directions.
+     * @return A stream of neighbouring tile indices in the order of directions.
      */
-    default int[] getNeighbouringTileIndices(int tileIndex) {
-        int[] neighbouringIndices = new int[getNeighbourCount()];
-
-        for (int directionIndex = 0, neighbourCount = getNeighbourCount();
-             directionIndex < neighbourCount;
-             directionIndex += 1) {
-            neighbouringIndices[directionIndex] = getNeighbouringTileIndex(tileIndex, directionIndex);
-        }
-
-        return neighbouringIndices;
+    default IntStream neighbouringTileIndicesStream(int tileIndex) {
+        return IntStream.range(0, getNeighbourCount()).map(directionIndex -> getNeighbouringTileIndex(tileIndex, directionIndex));
     }
 
     /**

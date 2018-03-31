@@ -107,4 +107,9 @@ public class Vector2d {
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Vector2d [%f; %f]", x, y);
+    }
 }

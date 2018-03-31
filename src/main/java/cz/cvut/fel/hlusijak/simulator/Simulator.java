@@ -25,7 +25,7 @@ public class Simulator {
     }
 
     /**
-     * Executes an iteration of the simulation in a parallelized way.
+     * Executes an iteration of the simulation in a paralellized way.
      * @return The number of iterations executed including the requested one.
      */
     public synchronized Future<Integer> nextIteration() {
