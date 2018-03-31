@@ -49,7 +49,7 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
             }
         }
 
-        throw new RuntimeException("Unreachable.");
+        throw new IllegalArgumentException("Invalid direction index.");
     }
 
     @Override
