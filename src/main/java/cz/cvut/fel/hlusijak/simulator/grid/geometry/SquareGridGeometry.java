@@ -3,14 +3,17 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 
 /**
- * A grid of squares.
+ * a grid of squares.
+ *
+ * example 4x4 grid:
+ * |_|_|_|_|
+ * |_|_|_|_|
+ * |_|_|_|_|
+ * |_|_|_|_|
  */
 public class SquareGridGeometry extends AbstractRectangularGridGeometry {
     public SquareGridGeometry(int width, int height) {
         super(width, height);
-
-        int max = Math.max(width, height);
-        Vector2d unitDims = new Vector2d(width, height).div(new Vector2d(max));
     }
 
     @Override
