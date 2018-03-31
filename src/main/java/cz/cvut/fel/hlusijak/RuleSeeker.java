@@ -20,10 +20,14 @@ public class RuleSeeker {
     }
 
     public static void main(String[] args) {
-        int total = (int) SumRuleSet.combinationsWithRepetitions(4, 3);
+        int total = (int) SumRuleSet.combinationsWithRepetitions(6, 3);
 
-        for (int i = 0; i <= total; i++) {
-            System.out.println(Arrays.toString(SumRuleSet.combinationWithRepetition(4, 3, i)));
+        System.out.println("Total: " + total);
+
+        for (int i = 0; i < total; i++) {
+            int[] combination = SumRuleSet.combinationWithRepetition(6, 3, i);
+            int combinationIndex = SumRuleSet.combinationIndexWithRepetition(combination);
+            System.out.println(combinationIndex + ": " + Arrays.toString(combination));
         }
         //instance = new RuleSeeker();
         //Application.launch(SimulatorApplication.class, args);

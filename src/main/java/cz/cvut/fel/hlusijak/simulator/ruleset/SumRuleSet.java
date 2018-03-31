@@ -4,16 +4,29 @@ import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 
+import java.util.Arrays;
+
 public class SumRuleSet implements RuleSet {
     private final GridGeometry gridGeometry;
     private final int states;
+    private final int[] rules;
 
-    public SumRuleSet(GridGeometry gridGeometry, int states) {
+    public SumRuleSet(GridGeometry gridGeometry, int states, int[] rules) {
         Preconditions.checkNotNull(gridGeometry);
         Preconditions.checkArgument(states >= 2, "The number of states must be at least 2.");
 
+        int requiredRulesLen = Math.toIntExact(combinationsWithRepetitions(gridGeometry.getNeighbourCount(), states));
+
+        if (rules == null) {
+            rules = new int[requiredRulesLen];
+        } else {
+            Preconditions.checkArgument(rules.length == requiredRulesLen,
+                    String.format("The rules array must be of length %d, but is of length %d", requiredRulesLen, rules.length));
+        }
+
         this.gridGeometry = gridGeometry;
         this.states = states;
+        this.rules = rules;
     }
 
     @Override
@@ -44,31 +57,7 @@ public class SumRuleSet implements RuleSet {
         return binomial(k + n - 1, k);
     }
 
-    /*
-    public static int[] combinationWithRepetition(int ofClass, int elements, int combinationIndex) {
-        int[] combination = new int[ofClass];
-        long k = 0;
-
-        for (int i = 0; i < ofClass - 1; i++) {
-            combination[i] = i != 0 ? combination[i - 1] : 0;
-            long r;
-
-            do {
-                combination[i]++;
-                r = binomial(elements - combination[i], ofClass - (i + 1));
-                k += r;
-            } while (k < combinationIndex);
-
-            k -= r;
-        }
-
-        combination[ofClass - 1] = combination[ofClass - 2] + combinationIndex - (int) k;
-
-        return combination;
-    }
-    */
-
-    private static void combinationWithRepetitionInner(int k, int n, int index, int[] result, int originalN) {
+    private static void combinationWithRepetitionInner(int k, int n, int index, int[] stateCount) {
         Integer foundState = null;
         int indexOffset = 0;
         int totalStateCombos = 0;
@@ -84,21 +73,57 @@ public class SumRuleSet implements RuleSet {
             }
         }
 
-        int writeIndex = result.length - k;
-        result[writeIndex] = foundState + originalN - n;
+        Preconditions.checkNotNull(foundState, "Combination index out of bounds.");
+
+        stateCount[foundState + stateCount.length - n] += 1;
 
         if (k > 1) {
-            combinationWithRepetitionInner(k - 1, n - foundState, index - indexOffset, result, originalN);
+            combinationWithRepetitionInner(k - 1, n - foundState, index - indexOffset, stateCount);
         }
     }
 
+    /**
+     * @param k Number of selected items
+     * @param n Number of different states to select from
+     * @param index Index of the combination with repetition to return
+     * @return The combination at the given {@param index} represented by the count of each state at its index in the returned array
+     */
     public static int[] combinationWithRepetition(int k, int n, int index) {
         Preconditions.checkArgument(k > 0, "The combination class (k) must be positive.");
         Preconditions.checkArgument(n > 0, "The number of states (n) must be positive.");
-        int[] result = new int[k];
+        int[] stateCount = new int[n];
 
-        combinationWithRepetitionInner(k, n, index, result, n);
+        combinationWithRepetitionInner(k, n, index, stateCount);
 
-        return result;
+        return stateCount;
+    }
+
+    private static int combinationIndexWithRepetitionInner(int[] stateCount, int k) {
+        int n = stateCount.length;
+        int index = 0;
+        int statesLeft = k;
+
+        for (int state = 0; state < stateCount.length - 1; state += 1) {
+            statesLeft -= stateCount[state];
+
+            if (statesLeft <= 0) {
+                break;
+            }
+
+            index += combinationsWithRepetitions(statesLeft - 1, stateCount.length - state);
+        }
+
+        return index;
+    }
+
+    /**
+     * @param stateCount The combination represented by the count of each state at its index in the returned array
+     * @return The index of the given combination with repetition
+     */
+    public static int combinationIndexWithRepetition(int[] stateCount) {
+        int k = Arrays.stream(stateCount).sum();
+        int n = stateCount.length;
+
+        return combinationIndexWithRepetitionInner(Arrays.copyOf(stateCount, stateCount.length), k);
     }
 }
