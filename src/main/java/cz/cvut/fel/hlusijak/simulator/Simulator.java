@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Simulator {
     private Grid grid;
@@ -21,14 +23,34 @@ public class Simulator {
         this.ruleSet = ruleSet;
         this.iteration = 0;
         this.cellsPerTask = cellsPerTask;
-        this.simulationExecutorService = Executors.newWorkStealingPool();
+        this.simulationExecutorService = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() + 1);
+    }
+
+    public CompletableFuture<Integer> runAsync(Predicate<Integer> onIterationComplete) {
+        return CompletableFuture.supplyAsync(() -> {
+            synchronized (this) {
+                try {
+                    int iteration;
+                    boolean cont;
+
+                    do {
+                        iteration = nextIterationAsync(true).get();
+                        cont = onIterationComplete.test(iteration);
+                    } while (cont);
+
+                    return iteration;
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, simulationExecutorService);
     }
 
     /**
      * Executes an iteration of the simulation in a paralellized way.
      * @return The number of iterations executed including the requested one.
      */
-    public synchronized Future<Integer> nextIteration() {
+    private Future<Integer> nextIterationAsync(boolean block) {
         final Grid currentGrid = grid;
         final RuleSet currentRuleSet = ruleSet;
         final int gridSize = currentGrid.getGeometry().getSize();
@@ -63,30 +85,54 @@ public class Simulator {
             tasks[taskIndex] = taskFuture;
         }
 
-        return CompletableFuture.allOf(tasks).thenApply(v -> {
-            synchronized (this) {
-                int offset = 0;
+        Supplier<Integer> combine = () -> {
+            int offset = 0;
 
-                for (CompletableFuture<int[]> task : tasks) {
-                    int[] newStates;
+            for (CompletableFuture<int[]> task : tasks) {
+                int[] newStates;
 
-                    try {
-                        newStates = task.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        // Unreachable due to the usage of CompletableFuture#allOf
-                        throw new RuntimeException(e);
-                    }
-
-                    grid.setTileStates(offset, newStates);
-
-                    offset += newStates.length;
+                try {
+                    newStates = task.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    // Unreachable due to the usage of CompletableFuture#allOf
+                    throw new RuntimeException(e);
                 }
 
-                this.iteration += 1;
+                grid.setTileStates(offset, newStates);
 
-                return this.iteration;
+                offset += newStates.length;
             }
-        });
+
+            this.iteration += 1;
+
+            return this.iteration;
+        };
+
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(tasks);
+
+        if (block) {
+            try {
+                allTasks.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+
+            return CompletableFuture.completedFuture(combine.get());
+        } else {
+            return allTasks.thenApply(v -> {
+                synchronized (this) {
+                    return combine.get();
+                }
+            });
+        }
+    }
+
+    /**
+     * Executes an iteration of the simulation in a paralellized way.
+     * @return The number of iterations executed including the requested one.
+     */
+    public synchronized Future<Integer> nextIteration() {
+        return nextIterationAsync(false);
     }
 
     public synchronized Grid getGrid() {
