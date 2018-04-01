@@ -9,13 +9,15 @@ import java.util.Arrays;
 public class SumRuleSet implements RuleSet {
     private final GridGeometry gridGeometry;
     private final int states;
+    private final int neighbouringStateCombinations;
     private int[] rules;
 
     public SumRuleSet(GridGeometry gridGeometry, int states, int[] rules) {
         Preconditions.checkNotNull(gridGeometry);
         Preconditions.checkArgument(states >= 2, "The number of states must be at least 2.");
 
-        int requiredRulesLen = Math.toIntExact(combinationsWithRepetitions(gridGeometry.getNeighbourCount(), states));
+        this.neighbouringStateCombinations = Math.toIntExact(combinationsWithRepetitions(gridGeometry.getNeighbourCount(), states));
+        int requiredRulesLen = states * neighbouringStateCombinations;
 
         if (rules == null) {
             rules = new int[requiredRulesLen];
@@ -61,8 +63,9 @@ public class SumRuleSet implements RuleSet {
 
     @Override
     public int getNextTileState(Grid grid, int tileIndex) {
-        int[] stateCount = countNeighbouringStates(grid, tileIndex);
-        int ruleIndex = combinationIndexWithRepetition(stateCount);
+        int state = grid.getTileState(tileIndex);
+        int[] neighbouringStateCount = countNeighbouringStates(grid, tileIndex);
+        int ruleIndex = state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
 
         return rules[ruleIndex];
     }

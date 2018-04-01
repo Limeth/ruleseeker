@@ -1,11 +1,12 @@
 package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
+import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 
 /**
- * a grid of triangles.
+ * A grid of hexagons.
  *
- * example 4x4 grid:
+ * Example 4x4 grid:
  * .-'-.-'-.-'-.-'-.
  * |   |   |   |   |
  * '-.-'-.-'-.-'-.-'-.
@@ -21,6 +22,7 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
 
     public HexagonGridGeometry(int width, int height) {
         super(width, height);
+        Preconditions.checkArgument(height % 2 == 0, "The height must be even.");
     }
 
     @Override

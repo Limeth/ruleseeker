@@ -2,10 +2,17 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,44 +23,117 @@
 <SplitPane dividerPositions="0.6" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.cvut.fel.hlusijak.simulator.SimulatorController">
    <items>
       <Pane fx:id="viewPane" />
-      <VBox spacing="24.0">
-         <children>
-            <HBox alignment="TOP_CENTER" spacing="16.0">
-               <children>
-                  <Button fx:id="resumeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Resume" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="stepButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Step" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="pauseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Pause" HBox.hgrow="SOMETIMES" />
-               </children>
-            </HBox>
-            <Separator prefWidth="200.0">
-               <VBox.margin>
-                  <Insets left="-16.0" right="-16.0" />
-               </VBox.margin>
-            </Separator>
-            <GridPane hgap="16.0" vgap="24.0">
-               <columnConstraints>
-                  <ColumnConstraints minWidth="10.0" />
-                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                  <ColumnConstraints minWidth="10.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-               <children>
-                  <ChoiceBox fx:id="editModeChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
-                  <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Edit mode" textAlignment="RIGHT" />
-                  <Button fx:id="fillButton" mnemonicParsing="false" text="Fill" GridPane.columnIndex="2" />
-               </children>
-            </GridPane>
-            <HBox spacing="16.0">
-               <children>
-                  <Button fx:id="randomizeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Randomize" HBox.hgrow="ALWAYS" />
-               </children>
-            </HBox>
-         </children>
-         <padding>
-            <Insets bottom="24.0" left="16.0" right="16.0" top="24.0" />
-         </padding>
-      </VBox>
+      <TabPane>
+         <tabs>
+            <Tab fx:id="settingsTab" text="Settings">
+               <content>
+                  <VBox spacing="24.0">
+                     <children>
+                        <VBox spacing="12.0">
+                           <children>
+                              <Button fx:id="importRulesOrStateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Import rules or state" />
+                              <Button fx:id="exportStateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Export state" />
+                           </children>
+                        </VBox>
+                        <Separator prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets left="-16.0" right="-16.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <GridPane hgap="12.0">
+                           <columnConstraints>
+                              <ColumnConstraints minWidth="10.0" />
+                              <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <Label alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" text="Width:" />
+                              <Spinner fx:id="widthSpinner" GridPane.rowIndex="1" />
+                              <Spinner fx:id="heightSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label alignment="TOP_LEFT" layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308" text="Height:" GridPane.columnIndex="1" />
+                           </children>
+                        </GridPane>
+                        <Separator prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets left="-16.0" right="-16.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <VBox spacing="12.0">
+                           <children>
+                              <CheckBox fx:id="customStateColorsCheckBox" mnemonicParsing="false" text="Custom state colors" />
+                              <HBox fx:id="customStateColorsHBox" disable="true" spacing="12.0">
+                                 <children>
+                                    <ChoiceBox fx:id="customStateColorsStateChoiceBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                    <ColorPicker fx:id="customStateColorsColorPicker" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="24.0" left="16.0" right="16.0" top="24.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+            <Tab text="Simulation">
+               <content>
+                  <VBox spacing="24.0">
+                     <children>
+                        <HBox alignment="TOP_CENTER" spacing="12.0">
+                           <children>
+                              <Button fx:id="resumeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Resume" HBox.hgrow="SOMETIMES" />
+                              <Button fx:id="stepButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Step" HBox.hgrow="SOMETIMES" />
+                              <Button fx:id="pauseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Pause" HBox.hgrow="SOMETIMES" />
+                           </children>
+                        </HBox>
+                        <VBox spacing="12.0">
+                           <children>
+                              <HBox alignment="CENTER" spacing="6.0">
+                                 <children>
+                                    <Label text="Interval:" HBox.hgrow="ALWAYS">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <padding>
+                                          <Insets right="6.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField fx:id="intervalTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="0.0" HBox.hgrow="SOMETIMES" />
+                                    <Label text="s" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                              <Slider fx:id="intervalSlider" />
+                           </children>
+                        </VBox>
+                        <Separator prefWidth="200.0">
+                           <VBox.margin>
+                              <Insets left="-16.0" right="-16.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <HBox alignment="CENTER" spacing="6.0">
+                           <children>
+                              <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Edit mode:" textAlignment="RIGHT" />
+                              <ChoiceBox fx:id="editModeChoiceBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="fillButton" mnemonicParsing="false" text="Fill" />
+                           </children>
+                        </HBox>
+                        <HBox spacing="16.0">
+                           <children>
+                              <Button fx:id="randomizeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Randomize" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="24.0" left="16.0" right="16.0" top="24.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
    </items>
 </SplitPane>

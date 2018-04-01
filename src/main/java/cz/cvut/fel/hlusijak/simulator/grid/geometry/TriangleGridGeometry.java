@@ -1,5 +1,6 @@
 package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
+import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 
 /**
@@ -16,6 +17,8 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
 
     public TriangleGridGeometry(int width, int height) {
         super(width, height);
+        Preconditions.checkArgument(width % 2 == 0, "The width must be even.");
+        Preconditions.checkArgument(height % 2 == 0, "The height must be even.");
     }
 
     @Override

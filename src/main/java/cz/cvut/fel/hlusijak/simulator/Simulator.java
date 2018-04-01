@@ -31,7 +31,9 @@ public class Simulator {
     public synchronized Future<Integer> nextIteration() {
         final Grid currentGrid = grid;
         final RuleSet currentRuleSet = ruleSet;
-        final int taskCount = (int) Math.ceil((double) currentGrid.getGeometry().getSize() / (double) cellsPerTask);
+        final int gridSize = currentGrid.getGeometry().getSize();
+        final boolean additionalTask = Math.floorMod(gridSize, cellsPerTask) != 0;
+        final int taskCount = gridSize / cellsPerTask + (additionalTask ? 1 : 0);
         // Wow, Java, nice generics.
         //noinspection unchecked
         CompletableFuture<int[]>[] tasks = new CompletableFuture[taskCount];
@@ -40,8 +42,8 @@ public class Simulator {
             final int currentTaskIndex = taskIndex;
             final int currentCellsPerTask;
 
-            if (taskIndex >= taskCount - 1) {
-                currentCellsPerTask = taskCount * cellsPerTask - currentGrid.getGeometry().getSize();
+            if (additionalTask && taskIndex >= taskCount - 1) {
+                currentCellsPerTask = gridSize - taskIndex * cellsPerTask;
             } else {
                 currentCellsPerTask = cellsPerTask;
             }

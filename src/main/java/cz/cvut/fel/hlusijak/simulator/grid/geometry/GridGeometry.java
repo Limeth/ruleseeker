@@ -42,11 +42,18 @@ public interface GridGeometry {
     Vector2d[] getTileVertices(int tileIndex);
 
     /**
+     * @return A stream of all direction indices.
+     */
+    default IntStream directionIndicesStream() {
+        return IntStream.range(0, getNeighbourCount());
+    }
+
+    /**
      * @param tileIndex The index of the center tile.
      * @return A stream of neighbouring tile indices in the order of directions.
      */
     default IntStream neighbouringTileIndicesStream(int tileIndex) {
-        return IntStream.range(0, getNeighbourCount()).map(directionIndex -> getNeighbouringTileIndex(tileIndex, directionIndex));
+        return directionIndicesStream().map(directionIndex -> getNeighbouringTileIndex(tileIndex, directionIndex));
     }
 
     /**
