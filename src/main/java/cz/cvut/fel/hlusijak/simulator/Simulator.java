@@ -3,7 +3,9 @@ package cz.cvut.fel.hlusijak.simulator;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
+import cz.cvut.fel.hlusijak.util.Wrapper;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -22,7 +24,7 @@ public class Simulator {
         this.cellsPerTask = cellsPerTask;
     }
 
-    private CompletableFuture<Integer> recursiveFuture(Function<Integer, CompletableFuture<Boolean>> onIterationComplete) {
+    private CompletableFuture<Integer> recursiveFuture(Function<IterationResult, CompletableFuture<Boolean>> onIterationComplete) {
         return nextIterationAsync().thenCompose(onIterationComplete).thenCompose(cont -> {
             if (cont) {
                 return recursiveFuture(onIterationComplete);
@@ -32,22 +34,15 @@ public class Simulator {
         });
     }
 
-    public CompletableFuture<Integer> runAsync(Function<Integer, CompletableFuture<Boolean>> onIterationComplete) {
-        return FutureUtil.futureTaskBackground(v -> {
-            synchronized (this) {
-                return recursiveFuture(onIterationComplete);
-            }
-        });
+    public CompletableFuture<Integer> runAsync(Function<IterationResult, CompletableFuture<Boolean>> onIterationComplete) {
+        return FutureUtil.futureTaskBackground(v -> recursiveFuture(onIterationComplete));
     }
 
-    /**
-     * Executes an iteration of the simulation in a paralellized way.
-     * @return The number of iterations executed including the requested one.
-     */
-    private CompletableFuture<Integer> nextIterationAsync() {
-        final Grid currentGrid = grid;
+    private CompletableFuture<IterationResult> nextIterationAsync() {
+        final Instant computationStart = Instant.now();
+        final Grid previousGrid = grid.clone();
         final RuleSet currentRuleSet = ruleSet;
-        final int gridSize = currentGrid.getGeometry().getSize();
+        final int gridSize = previousGrid.getGeometry().getSize();
         final boolean additionalTask = Math.floorMod(gridSize, cellsPerTask) != 0;
         final int taskCount = gridSize / cellsPerTask + (additionalTask ? 1 : 0);
         // Wow, Java, nice generics.
@@ -70,7 +65,7 @@ public class Simulator {
 
                 for (int relativeTileIndex = 0; relativeTileIndex < currentCellsPerTask; relativeTileIndex += 1) {
                     int absoluteTileIndex = relativeTileIndex + cellIndexOffset;
-                    newStates[relativeTileIndex] = currentRuleSet.getNextTileState(currentGrid, absoluteTileIndex);
+                    newStates[relativeTileIndex] = currentRuleSet.getNextTileState(previousGrid, absoluteTileIndex);
                 }
 
                 return newStates;
@@ -78,6 +73,8 @@ public class Simulator {
 
             tasks[taskIndex] = taskFuture;
         }
+
+        Wrapper<Grid> nextGrid = new Wrapper<>(previousGrid.clone());
 
         Supplier<Integer> combine = () -> {
             int offset = 0;
@@ -92,11 +89,12 @@ public class Simulator {
                     throw new RuntimeException(e);
                 }
 
-                grid.setTileStates(offset, newStates);
+                nextGrid.value.setTileStates(offset, newStates);
 
                 offset += newStates.length;
             }
 
+            this.grid = nextGrid.value.clone();
             this.iteration += 1;
 
             return this.iteration;
@@ -105,17 +103,19 @@ public class Simulator {
         CompletableFuture<Void> allTasks = CompletableFuture.allOf(tasks);
 
         return allTasks.thenApplyAsync(v -> {
+            int iterationsCompleted;
+
             synchronized (this) {
-                return combine.get();
+                iterationsCompleted = combine.get();
             }
+
+            Instant computationFinish = Instant.now();
+
+            return new IterationResult(iterationsCompleted, computationStart, computationFinish, previousGrid, nextGrid.value);
         }, FutureUtil.getBackgroundExecutor());
     }
 
-    /**
-     * Executes an iteration of the simulation in a paralellized way.
-     * @return The number of iterations executed including the requested one.
-     */
-    public synchronized CompletableFuture<Integer> nextIteration() {
+    public synchronized CompletableFuture<IterationResult> nextIteration() {
         return nextIterationAsync();
     }
 

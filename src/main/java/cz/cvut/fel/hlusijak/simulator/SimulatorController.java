@@ -4,6 +4,7 @@ import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
+import cz.cvut.fel.hlusijak.util.TimeUtil;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 import cz.cvut.fel.hlusijak.util.Wrapper;
 import javafx.beans.InvalidationListener;
@@ -24,10 +25,13 @@ import javafx.scene.paint.Paint;
 import org.javatuples.Pair;
 
 import java.net.URL;
+import java.time.Instant;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class SimulatorController implements Initializable {
@@ -54,8 +58,19 @@ public class SimulatorController implements Initializable {
     @FXML private Button fillButton;
     @FXML private Button randomizeButton;
 
+    // Synchronizes access to the following fields.
+    private final Object simulationLock = new Object();
+    private boolean resumed;
+    private boolean resumeTaskRunning;
+    private double intervalSeconds;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        initializeView();
+        initializeSimulationTab();
+    }
+
+    private void initializeView() {
         viewPane.layoutBoundsProperty()
                 .addListener(observable -> updateViewPane(null));
 
@@ -66,17 +81,54 @@ public class SimulatorController implements Initializable {
             updateViewPane(null);
         };
         viewPane.heightProperty().addListener(firstRenderListener.value);
+    }
+
+    private void initializeSimulationTab() {
+        Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
+        intervalTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                synchronized (simulationLock) {
+                    this.intervalSeconds = Double.parseDouble(newValue);
+                }
+            } catch (NumberFormatException e) {
+                // Don't change the value
+            }
+        });
+
+        intervalTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                synchronized (simulationLock) {
+                    intervalTextField.setText(Double.toString(this.intervalSeconds));
+                }
+            }
+        });
+
+        resumeButton.setOnAction(event -> {
+            synchronized (simulationLock) {
+                resumed = true;
+
+                if (resumeTaskRunning) {
+                    return;
+                }
+
+                resumeTaskRunning = true;
+                simulator.runAsync(this::onIterationComplete);
+            }
+        });
 
         stepButton.setOnAction(event -> {
-            Simulator simulator = RuleSeeker.getInstance().getSimulator();
-
             simulator.nextIteration().thenAcceptAsync(iteration ->
                 updateViewPane(null), FutureUtil.getJFXExecutor());
         });
 
-        randomizeButton.setOnAction(event -> {
-            Simulator simulator = RuleSeeker.getInstance().getSimulator();
+        pauseButton.setOnAction(event -> {
+            synchronized (simulationLock) {
+                resumed = false;
+            }
+        });
 
+        randomizeButton.setOnAction(event -> {
             synchronized (simulator) {
                 Grid grid = simulator.getGrid();
 
@@ -87,23 +139,48 @@ public class SimulatorController implements Initializable {
 
             updateViewPane(null);
         });
+    }
 
-        resumeButton.setOnAction(event -> {
+    private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {
+        return FutureUtil.futureTaskJFX(() -> {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
-            simulator.runAsync(iteration -> {
-                //Platform.runLater(() -> updateViewPane(simulator.getGrid()));
-                return FutureUtil.futureTaskJFX(() -> updateViewPane(simulator.getGrid()))
-                        .thenApplyAsync(v -> {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                            return iteration % 10 != 0;
-                        }, FutureUtil.getBackgroundExecutor());
-            });
-        });
+            updateViewPane(simulator.getGrid());
+        })
+        .thenApplyAsync(v -> {
+            while (true) {
+                boolean loadedResumed;
+                double loadedIntervalSeconds;
+
+                synchronized (simulationLock) {
+                    loadedResumed = this.resumed;
+                    loadedIntervalSeconds = this.intervalSeconds;
+                }
+
+                if (!loadedResumed) {
+                    return false;
+                }
+
+                Instant now = Instant.now();
+                Duration durationElapsed = Duration.between(iterationResult.getComputationStart(), now);
+                Duration requiredDuration = TimeUtil.ofSeconds(loadedIntervalSeconds);
+
+                if (durationElapsed.compareTo(requiredDuration) > 0) {
+                    return true;
+                }
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, FutureUtil.getBackgroundExecutor())
+        .thenApplyAsync(cont -> {
+            synchronized (simulationLock) {
+                return this.resumeTaskRunning = cont && this.resumed;
+            }
+        }, FutureUtil.getJFXExecutor());
     }
 
     private Paint getCellColor(int state) {
