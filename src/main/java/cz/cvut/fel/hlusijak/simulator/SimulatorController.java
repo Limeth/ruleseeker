@@ -3,9 +3,9 @@ package cz.cvut.fel.hlusijak.simulator;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.util.FutureUtil;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 import cz.cvut.fel.hlusijak.util.Wrapper;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class SimulatorController implements Initializable {
@@ -71,13 +70,8 @@ public class SimulatorController implements Initializable {
         stepButton.setOnAction(event -> {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
-            try {
-                simulator.nextIteration().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-
-            updateViewPane(null);
+            simulator.nextIteration().thenAcceptAsync(iteration ->
+                updateViewPane(null), FutureUtil.getJFXExecutor());
         });
 
         randomizeButton.setOnAction(event -> {
@@ -98,13 +92,16 @@ public class SimulatorController implements Initializable {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
             simulator.runAsync(iteration -> {
-                Platform.runLater(() -> updateViewPane(simulator.getGrid()));
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return iteration % 10 != 0;
+                //Platform.runLater(() -> updateViewPane(simulator.getGrid()));
+                return FutureUtil.futureTaskJFX(() -> updateViewPane(simulator.getGrid()))
+                        .thenApplyAsync(v -> {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return iteration % 10 != 0;
+                        }, FutureUtil.getBackgroundExecutor());
             });
         });
     }

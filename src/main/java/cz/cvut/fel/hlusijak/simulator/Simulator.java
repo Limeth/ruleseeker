@@ -2,13 +2,11 @@ package cz.cvut.fel.hlusijak.simulator;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.util.FutureUtil;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Simulator {
@@ -16,41 +14,37 @@ public class Simulator {
     private RuleSet ruleSet;
     private int iteration;
     private int cellsPerTask;
-    private ExecutorService simulationExecutorService;
 
     public Simulator(Grid grid, RuleSet ruleSet, int cellsPerTask) {
         this.grid = grid;
         this.ruleSet = ruleSet;
         this.iteration = 0;
         this.cellsPerTask = cellsPerTask;
-        this.simulationExecutorService = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() + 1);
     }
 
-    public CompletableFuture<Integer> runAsync(Predicate<Integer> onIterationComplete) {
-        return CompletableFuture.supplyAsync(() -> {
-            synchronized (this) {
-                try {
-                    int iteration;
-                    boolean cont;
-
-                    do {
-                        iteration = nextIterationAsync(true).get();
-                        cont = onIterationComplete.test(iteration);
-                    } while (cont);
-
-                    return iteration;
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+    private CompletableFuture<Integer> recursiveFuture(Function<Integer, CompletableFuture<Boolean>> onIterationComplete) {
+        return nextIterationAsync().thenCompose(onIterationComplete).thenCompose(cont -> {
+            if (cont) {
+                return recursiveFuture(onIterationComplete);
+            } else {
+                return CompletableFuture.completedFuture(iteration);
             }
-        }, simulationExecutorService);
+        });
+    }
+
+    public CompletableFuture<Integer> runAsync(Function<Integer, CompletableFuture<Boolean>> onIterationComplete) {
+        return FutureUtil.futureTaskBackground(v -> {
+            synchronized (this) {
+                return recursiveFuture(onIterationComplete);
+            }
+        });
     }
 
     /**
      * Executes an iteration of the simulation in a paralellized way.
      * @return The number of iterations executed including the requested one.
      */
-    private Future<Integer> nextIterationAsync(boolean block) {
+    private CompletableFuture<Integer> nextIterationAsync() {
         final Grid currentGrid = grid;
         final RuleSet currentRuleSet = ruleSet;
         final int gridSize = currentGrid.getGeometry().getSize();
@@ -70,7 +64,7 @@ public class Simulator {
                 currentCellsPerTask = cellsPerTask;
             }
 
-            CompletableFuture<int[]> taskFuture = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<int[]> taskFuture = FutureUtil.futureTaskBackground(() -> {
                 final int cellIndexOffset = currentTaskIndex * cellsPerTask;
                 final int[] newStates = new int[currentCellsPerTask];
 
@@ -80,7 +74,7 @@ public class Simulator {
                 }
 
                 return newStates;
-            }, simulationExecutorService);
+            });
 
             tasks[taskIndex] = taskFuture;
         }
@@ -110,29 +104,19 @@ public class Simulator {
 
         CompletableFuture<Void> allTasks = CompletableFuture.allOf(tasks);
 
-        if (block) {
-            try {
-                allTasks.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+        return allTasks.thenApplyAsync(v -> {
+            synchronized (this) {
+                return combine.get();
             }
-
-            return CompletableFuture.completedFuture(combine.get());
-        } else {
-            return allTasks.thenApply(v -> {
-                synchronized (this) {
-                    return combine.get();
-                }
-            });
-        }
+        }, FutureUtil.getBackgroundExecutor());
     }
 
     /**
      * Executes an iteration of the simulation in a paralellized way.
      * @return The number of iterations executed including the requested one.
      */
-    public synchronized Future<Integer> nextIteration() {
-        return nextIterationAsync(false);
+    public synchronized CompletableFuture<Integer> nextIteration() {
+        return nextIterationAsync();
     }
 
     public synchronized Grid getGrid() {
