@@ -62,6 +62,7 @@ public class SimulatorController implements Initializable {
     private final Object simulationLock = new Object();
     private boolean resumed;
     private boolean resumeTaskRunning;
+    private boolean ignoreIntervalEvents;
     private double intervalSeconds;
 
     @Override
@@ -90,6 +91,9 @@ public class SimulatorController implements Initializable {
             try {
                 synchronized (simulationLock) {
                     this.intervalSeconds = Double.parseDouble(newValue);
+                    this.ignoreIntervalEvents = true;
+                    intervalSlider.setValue(Math.max(Math.min(intervalSeconds * 100, 100.0), 0));
+                    this.ignoreIntervalEvents = false;
                 }
             } catch (NumberFormatException e) {
                 // Don't change the value
@@ -101,6 +105,17 @@ public class SimulatorController implements Initializable {
                 synchronized (simulationLock) {
                     intervalTextField.setText(Double.toString(this.intervalSeconds));
                 }
+            }
+        });
+
+        intervalSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            synchronized (simulationLock) {
+                if (ignoreIntervalEvents) {
+                    return;
+                }
+
+                this.intervalSeconds = newValue.doubleValue() / 100.0;
+                intervalTextField.setText(Double.toString(this.intervalSeconds));
             }
         });
 
