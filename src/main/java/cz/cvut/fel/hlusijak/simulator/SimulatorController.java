@@ -63,7 +63,7 @@ public class SimulatorController implements Initializable {
     private boolean resumed;
     private boolean resumeTaskRunning;
     private boolean ignoreIntervalEvents;
-    private double intervalSeconds;
+    private double intervalSeconds = 1.0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -115,9 +115,12 @@ public class SimulatorController implements Initializable {
                 }
 
                 this.intervalSeconds = newValue.doubleValue() / 100.0;
+                this.intervalSeconds = Math.floor(this.intervalSeconds * 100) / 100;
                 intervalTextField.setText(Double.toString(this.intervalSeconds));
             }
         });
+
+        intervalTextField.setText(Double.toString(this.intervalSeconds));
 
         resumeButton.setOnAction(event -> {
             synchronized (simulationLock) {
