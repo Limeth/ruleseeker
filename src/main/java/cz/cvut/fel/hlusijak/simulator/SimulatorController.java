@@ -3,6 +3,7 @@ package cz.cvut.fel.hlusijak.simulator;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
 import cz.cvut.fel.hlusijak.util.TimeUtil;
 import cz.cvut.fel.hlusijak.util.Vector2d;
@@ -10,14 +11,9 @@ import cz.cvut.fel.hlusijak.util.Wrapper;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -25,8 +21,8 @@ import javafx.scene.paint.Paint;
 import org.javatuples.Pair;
 
 import java.net.URL;
-import java.time.Instant;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -54,7 +50,7 @@ public class SimulatorController implements Initializable {
     @FXML private Button pauseButton;
     @FXML private TextField intervalTextField;
     @FXML private Slider intervalSlider;
-    @FXML private ChoiceBox<Integer> editModeChoiceBox;
+    @FXML private ComboBox<Integer> editModeComboBox;
     @FXML private Button fillButton;
     @FXML private Button randomizeButton;
 
@@ -65,8 +61,12 @@ public class SimulatorController implements Initializable {
     private boolean ignoreIntervalEvents;
     private double intervalSeconds = 1.0;
 
+    private double hueOffset = 0; // Update whenever the rule set changes
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        hueOffset = RuleSeeker.getInstance().getSimulator().getRuleSet().getHueOffset();
+
         initializeView();
         initializeSimulationTab();
     }
@@ -87,9 +87,37 @@ public class SimulatorController implements Initializable {
     private void initializeSimulationTab() {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
+        resumeButton.setOnAction(event -> {
+            synchronized (simulationLock) {
+                resumed = true;
+
+                if (resumeTaskRunning) {
+                    return;
+                }
+
+                resumeTaskRunning = true;
+                simulator.runAsync(this::onIterationComplete);
+            }
+        });
+
+        stepButton.setOnAction(event -> {
+            simulator.nextIteration().thenAcceptAsync(iteration ->
+                updateViewPane(null), FutureUtil.getJFXExecutor());
+        });
+
+        pauseButton.setOnAction(event -> {
+            synchronized (simulationLock) {
+                resumed = false;
+            }
+        });
+
         intervalTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 synchronized (simulationLock) {
+                    if (this.ignoreIntervalEvents) {
+                        return;
+                    }
+
                     this.intervalSeconds = Double.parseDouble(newValue);
                     this.ignoreIntervalEvents = true;
                     intervalSlider.setValue(Math.max(Math.min(intervalSeconds * 100, 100.0), 0));
@@ -116,35 +144,41 @@ public class SimulatorController implements Initializable {
 
                 this.intervalSeconds = newValue.doubleValue() / 100.0;
                 this.intervalSeconds = Math.floor(this.intervalSeconds * 100) / 100;
+                this.ignoreIntervalEvents = true;
+
                 intervalTextField.setText(Double.toString(this.intervalSeconds));
+
+                this.ignoreIntervalEvents = false;
             }
         });
 
         intervalTextField.setText(Double.toString(this.intervalSeconds));
 
-        resumeButton.setOnAction(event -> {
-            synchronized (simulationLock) {
-                resumed = true;
+        editModeComboBox.setCellFactory(listView -> {
+            ListCell<Integer> listCell = new ListCell<Integer>() {
+                @Override
+                protected void updateItem(Integer item, boolean empty) {
+                    super.updateItem(item, empty);
 
-                if (resumeTaskRunning) {
-                    return;
+                    if (item == null || empty) {
+                        return;
+                    }
+
+                    setText(Integer.toString(item));
+                    setBackground(new Background(new BackgroundFill(getCellColor(item), null, null)));
                 }
+            };
 
-                resumeTaskRunning = true;
-                simulator.runAsync(this::onIterationComplete);
-            }
+
+            return listCell;
         });
 
-        stepButton.setOnAction(event -> {
-            simulator.nextIteration().thenAcceptAsync(iteration ->
-                updateViewPane(null), FutureUtil.getJFXExecutor());
-        });
+        editModeComboBox.valueProperty().addListener(((observable, oldValue, newValue) -> {
+            editModeComboBox.setBackground(new Background(new BackgroundFill(getCellColor(newValue), null, null)));
+        }));
 
-        pauseButton.setOnAction(event -> {
-            synchronized (simulationLock) {
-                resumed = false;
-            }
-        });
+        RuleSeeker.getInstance().getSimulator().getRuleSet().stateStream().forEach(editModeComboBox.itemsProperty().get()::add);
+        editModeComboBox.setValue(editModeComboBox.getItems().get(0));
 
         randomizeButton.setOnAction(event -> {
             synchronized (simulator) {
@@ -206,10 +240,11 @@ public class SimulatorController implements Initializable {
             return Color.WHITE;
         }
 
-        int remainingStates = RuleSeeker.getInstance().getSimulator().getRuleSet().getNumberOfStates() - 1;
+        RuleSet ruleSet = RuleSeeker.getInstance().getSimulator().getRuleSet();
+        int remainingStates = ruleSet.getNumberOfStates() - 1;
         state = state % remainingStates;
 
-        return Color.hsb(360.0 * state / (double) remainingStates, 1.0, 0.75);
+        return Color.hsb(360.0 * ((state / (double) remainingStates + ruleSet.getHueOffset()) % 1.0), 0.8, 1.0);
     }
 
     private Pair<Double, Vector2d> createTransformation() {

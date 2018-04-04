@@ -2,7 +2,9 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 
+import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public interface RuleSet {
     /**
@@ -42,5 +44,21 @@ public interface RuleSet {
         }
 
         setRules(rules);
+    }
+
+    /**
+     * @return A stream over all possible cell states.
+     */
+    default IntStream stateStream() {
+        return IntStream.range(0, getNumberOfStates());
+    }
+
+    /**
+     * This method is very expensive. Make sure to cache the result.
+     *
+     * @return Creates a unique hue offset in the <0; 1) range for the current rules.
+     */
+    default double getHueOffset() {
+        return new Random(Arrays.hashCode(getRules())).nextDouble();
     }
 }

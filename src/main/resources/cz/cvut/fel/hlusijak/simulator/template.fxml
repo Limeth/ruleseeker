@@ -5,6 +5,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
@@ -117,7 +118,7 @@
                         <HBox alignment="CENTER" spacing="6.0">
                            <children>
                               <Label alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" text="Edit mode:" textAlignment="RIGHT" />
-                              <ChoiceBox fx:id="editModeChoiceBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                              <ComboBox fx:id="editModeComboBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                               <Button fx:id="fillButton" mnemonicParsing="false" text="Fill" />
                            </children>
                         </HBox>

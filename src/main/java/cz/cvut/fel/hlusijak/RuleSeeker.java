@@ -18,7 +18,7 @@ public class RuleSeeker {
     public RuleSeeker() {
         Random rng = new Random();
         GridGeometry gridGeometry = new TriangleGridGeometry(24, 12);
-        RuleSet ruleSet = new SumRuleSet(gridGeometry, 3);
+        RuleSet ruleSet = new SumRuleSet(gridGeometry, 4);
 
         ruleSet.randomizeRules(rng);
 
