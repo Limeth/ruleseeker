@@ -51,6 +51,10 @@ public class CellShape extends Polygon {
         updateColor();
     }
 
+    public void updateState() {
+        setState(this.simulator.getGrid().getTileState(index));
+    }
+
     public void updateColor() {
         fillProperty().setValue(simulatorController.getCellColor(this.state));
     }

@@ -3,6 +3,7 @@ package cz.cvut.fel.hlusijak.simulator.grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -56,6 +57,10 @@ public class Grid {
      */
     public void setTileStates(int tileIndexOffset, int[] tileStates) {
         System.arraycopy(tileStates, 0, states, tileIndexOffset, tileStates.length);
+    }
+
+    public void fillTileStates(int state) {
+        Arrays.fill(this.states, state);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")

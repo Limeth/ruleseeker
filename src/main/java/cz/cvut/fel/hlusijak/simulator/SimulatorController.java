@@ -61,6 +61,7 @@ public class SimulatorController implements Initializable {
     private boolean ignoreIntervalEvents;
     private double intervalSeconds = 1.0;
 
+    private CellShape[] cellShapes;
     private double hueOffset = 0; // Update whenever the rule set changes
     private boolean mouseHeld = false;
 
@@ -184,6 +185,17 @@ public class SimulatorController implements Initializable {
         RuleSeeker.getInstance().getSimulator().getRuleSet().stateStream().forEach(editModeComboBox.itemsProperty().get()::add);
         editModeComboBox.setValue(editModeComboBox.getItems().get(0));
 
+        fillButton.setOnAction(event -> {
+            synchronized (simulator) {
+                Grid grid = simulator.getGrid();
+
+                grid.fillTileStates(getSelectedState());
+                simulator.setGrid(grid);
+                Arrays.stream(this.cellShapes)
+                        .forEach(CellShape::updateState);
+            }
+        });
+
         randomizeButton.setOnAction(event -> {
             synchronized (simulator) {
                 Grid grid = simulator.getGrid();
@@ -281,16 +293,16 @@ public class SimulatorController implements Initializable {
 
         viewPane.getChildren().clear();
 
-        gridGeometry.tileIndexStream().forEachOrdered(tileIndex -> {
-            List<Vector2d> tileVertices = Arrays.stream(gridGeometry.getTileVertices(tileIndex))
-                    .map(vertex -> vertex.mul(scale))
-                    .map(offset::add)
-                    .collect(Collectors.toList());
+        this.cellShapes = gridGeometry.tileIndexStream().boxed().map(tileIndex -> {
             int state = finalGrid.getTileState(tileIndex);
-            CellShape cellShape = new CellShape(this, state, tileVertices.toArray(new Vector2d[tileVertices.size()]));
+            CellShape cellShape = new CellShape(this, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
+                    .map(vertex -> vertex.mul(scale))
+                    .map(offset::add).toArray(Vector2d[]::new));
 
             viewPane.getChildren().add(cellShape);
-        });
+
+            return cellShape;
+        }).toArray(CellShape[]::new);
     }
 
     public int getSelectedState() {
