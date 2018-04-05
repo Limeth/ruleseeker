@@ -62,6 +62,7 @@ public class SimulatorController implements Initializable {
     private double intervalSeconds = 1.0;
 
     private double hueOffset = 0; // Update whenever the rule set changes
+    private boolean mouseHeld = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -82,6 +83,9 @@ public class SimulatorController implements Initializable {
             updateViewPane(null);
         };
         viewPane.heightProperty().addListener(firstRenderListener.value);
+
+        viewPane.setOnMousePressed(event -> mouseHeld = true);
+        viewPane.setOnMouseReleased(event -> mouseHeld = false);
     }
 
     private void initializeSimulationTab() {
@@ -235,7 +239,7 @@ public class SimulatorController implements Initializable {
         }, FutureUtil.getJFXExecutor());
     }
 
-    private Paint getCellColor(int state) {
+    public Paint getCellColor(int state) {
         if (state == 0) {
             return Color.WHITE;
         }
@@ -283,10 +287,17 @@ public class SimulatorController implements Initializable {
                     .map(offset::add)
                     .collect(Collectors.toList());
             int state = finalGrid.getTileState(tileIndex);
-            Paint fill = getCellColor(state);
-            CellShape cellShape = new CellShape(fill, tileVertices.toArray(new Vector2d[tileVertices.size()]));
+            CellShape cellShape = new CellShape(this, state, tileVertices.toArray(new Vector2d[tileVertices.size()]));
 
             viewPane.getChildren().add(cellShape);
         });
+    }
+
+    public int getSelectedState() {
+        return editModeComboBox.getValue();
+    }
+
+    public boolean isMouseHeld() {
+        return mouseHeld;
     }
 }

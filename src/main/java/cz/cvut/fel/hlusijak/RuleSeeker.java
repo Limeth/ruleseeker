@@ -4,6 +4,8 @@ import cz.cvut.fel.hlusijak.simulator.Simulator;
 import cz.cvut.fel.hlusijak.simulator.SimulatorApplication;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
