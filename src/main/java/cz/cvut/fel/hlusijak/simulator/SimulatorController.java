@@ -24,11 +24,9 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class SimulatorController implements Initializable {
     @FXML private Pane viewPane;
@@ -101,13 +99,14 @@ public class SimulatorController implements Initializable {
                 }
 
                 resumeTaskRunning = true;
+                settingsTab.setDisable(true);
                 simulator.runAsync(this::onIterationComplete);
             }
         });
 
         stepButton.setOnAction(event -> {
-            simulator.nextIteration().thenAcceptAsync(iteration ->
-                updateViewPane(null), FutureUtil.getJFXExecutor());
+            simulator.nextIteration().thenAcceptAsync(iterationResult ->
+                updateViewPane(iterationResult.getNextGrid()), FutureUtil.getJFXExecutor());
         });
 
         pauseButton.setOnAction(event -> {
@@ -246,7 +245,13 @@ public class SimulatorController implements Initializable {
         }, FutureUtil.getBackgroundExecutor())
         .thenApplyAsync(cont -> {
             synchronized (simulationLock) {
-                return this.resumeTaskRunning = cont && this.resumed;
+                this.resumeTaskRunning = cont && this.resumed;
+
+                if (!this.resumeTaskRunning) {
+                    this.settingsTab.setDisable(false);
+                }
+
+                return this.resumeTaskRunning;
             }
         }, FutureUtil.getJFXExecutor());
     }
