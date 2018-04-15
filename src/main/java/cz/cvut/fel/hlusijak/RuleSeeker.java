@@ -2,6 +2,8 @@ package cz.cvut.fel.hlusijak;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import cz.cvut.fel.hlusijak.Master;
+import cz.cvut.fel.hlusijak.Slave;
 import cz.cvut.fel.hlusijak.command.Args;
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.command.CommandSlave;
@@ -14,24 +16,45 @@ import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
 import javafx.application.Application;
 
+import java.lang.Runnable;
 import java.util.Random;
+import java.util.Properties;
+import java.io.IOException;
 
-public class RuleSeeker {
+public class RuleSeeker implements Runnable {
     private static RuleSeeker instance;
+    private String[] rawArgs;
+    private String projectArtifactId;
+    private String projectVersion;
+    private String gitCommitId;
     private Simulator simulator;
 
-    public RuleSeeker() {
-        Random rng = new Random();
-        GridGeometry gridGeometry = new TriangleGridGeometry(24, 12);
-        RuleSet ruleSet = new SumRuleSet(gridGeometry, 4);
+    private RuleSeeker(String[] rawArgs) {
+        instance = this;
+        this.rawArgs = rawArgs;
 
-        ruleSet.randomizeRules(rng);
+        Properties properties = new Properties();
 
-        Grid grid = new Grid(gridGeometry);
+        try {
+            properties.load(getClass().getClassLoader().getResourceAsStream("release.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        grid.randomizeTileStates(rng, ruleSet);
+        this.projectArtifactId = (String) properties.get("project.artifactId");
+        this.projectVersion = (String) properties.get("project.version");
+        this.gitCommitId = (String) properties.get("git.commit.id");
 
-        this.simulator = new Simulator(grid, ruleSet, 10);
+        System.out.printf("%s\n", this.projectArtifactId);
+        System.out.printf("\tVersion: %s\n", this.projectVersion);
+        System.out.printf("\tCommit ID: %s\n", this.gitCommitId);
+    }
+
+    public Simulator setSimulator(Simulator simulator) {
+        Simulator prev = this.simulator;
+        this.simulator = simulator;
+
+        return prev;
     }
 
     public Simulator getSimulator() {
@@ -39,7 +62,11 @@ public class RuleSeeker {
     }
 
     public static void main(String[] rawArgs) {
-        instance = new RuleSeeker();
+        new RuleSeeker(rawArgs).run();
+    }
+
+    @Override
+    public void run() {
         Args args = new Args();
         CommandMaster cmdMaster = new CommandMaster();
         CommandSlave cmdSlave = new CommandSlave();
@@ -65,10 +92,10 @@ public class RuleSeeker {
         if (jc.getParsedCommand() != null) {
             switch (jc.getParsedCommand()) {
                 case Args.SUBCOMMAND_MASTER:
-                    System.out.println("I'm a master!");
+                    new Master(cmdMaster).run();
                     return;
                 case Args.SUBCOMMAND_SLAVE:
-                    System.out.println("I'm a slave!");
+                    new Slave(cmdSlave).run();
                     return;
             }
         }
@@ -78,5 +105,17 @@ public class RuleSeeker {
 
     public static RuleSeeker getInstance() {
         return instance;
+    }
+
+    public String getProjectArtifactId() {
+        return this.projectArtifactId;
+    }
+
+    public String getProjectVersion() {
+        return this.projectVersion;
+    }
+
+    public String getGitCommitId() {
+        return this.gitCommitId;
     }
 }

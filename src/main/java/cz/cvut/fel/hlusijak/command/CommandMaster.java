@@ -6,5 +6,5 @@ import com.beust.jcommander.Parameters;
 @Parameters(commandDescription = "Run the miner master")
 public class CommandMaster {
     @Parameter(names = {"--port", "-p"}, description = "Port to listen on for the inbound master connection")
-    public int port;
+    public Integer port;
 }

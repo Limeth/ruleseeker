@@ -5,6 +5,9 @@ import com.beust.jcommander.Parameters;
 
 @Parameters(commandDescription = "Run the miner slave")
 public class CommandSlave {
-    @Parameter(names = {"--port", "-p"}, description = "Port to listen on for the inbound master connection")
-    public int port;
+    @Parameter(description = "The address of the master server")
+    public String masterAddress;
+
+    @Parameter(names = {"--port", "-p"}, description = "The port of the master server")
+    public Integer masterPort;
 }
