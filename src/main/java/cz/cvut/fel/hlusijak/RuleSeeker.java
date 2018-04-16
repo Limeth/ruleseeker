@@ -36,7 +36,7 @@ public class RuleSeeker implements Runnable {
         Properties properties = new Properties();
 
         try {
-            properties.load(getClass().getClassLoader().getResourceAsStream("release.properties"));
+            properties.load(getClass().getClassLoader().getResourceAsStream("build.properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
