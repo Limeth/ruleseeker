@@ -23,13 +23,20 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
+        int y = tileIndex / width;
+
         switch (directionIndex) {
-            case 0: return Math.floorMod(tileIndex + 1, size);
+            // Right
+            case 0: return Math.floorMod(tileIndex + 1, width) + y * width;
+            // Up
             case 1: return Math.floorMod(tileIndex - width, size);
-            case 2: return Math.floorMod(tileIndex - 1, size);
+            // Left
+            case 2: return Math.floorMod(tileIndex - 1, width) + y * width;
+            // Down
             case 3: return Math.floorMod(tileIndex + width, size);
-            default: throw new IllegalArgumentException("Invalid direction index.");
         }
+
+        throw new IllegalArgumentException("Invalid direction index.");
     }
 
     @Override

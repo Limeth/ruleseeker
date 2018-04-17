@@ -28,16 +28,15 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
-        int x = tileIndex % width;
         int y = tileIndex / width;
-        boolean pointingUp = (x + y) % 2 == 0;
+        boolean pointingUp = (tileIndex + y) % 2 == 0;
 
         if (pointingUp) {
             switch (directionIndex) {
                 // Right
-                case 0: return Math.floorMod(x + 1, width) + y * width;
+                case 0: return Math.floorMod(tileIndex + 1, width) + y * width;
                 // Left
-                case 1: return Math.floorMod(x - 1, width) + y * width;
+                case 1: return Math.floorMod(tileIndex - 1, width) + y * width;
                 // Down
                 case 2: return Math.floorMod(tileIndex + width, size);
             }
@@ -46,9 +45,9 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
                 // Up
                 case 0: return Math.floorMod(tileIndex - width, size);
                 // Left
-                case 1: return Math.floorMod(x - 1, width) + y * width;
+                case 1: return Math.floorMod(tileIndex - 1, width) + y * width;
                 // Right
-                case 2: return Math.floorMod(x + 1, width) + y * width;
+                case 2: return Math.floorMod(tileIndex + 1, width) + y * width;
             }
         }
 

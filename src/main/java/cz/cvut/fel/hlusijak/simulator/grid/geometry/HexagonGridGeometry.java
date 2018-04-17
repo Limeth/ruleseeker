@@ -32,38 +32,37 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
-        int x = tileIndex % width;
         int y = tileIndex / width;
 
         if (y % 2 == 0) {
             switch (directionIndex) {
                 // Right
-                case 0: return Math.floorMod(x + 1, width) + y * width;
+                case 0: return Math.floorMod(tileIndex + 1, width) + y * width;
                 // Up-Right:
                 case 1: return Math.floorMod(tileIndex - width, size);
                 // Up-Left:
-                case 2: return Math.floorMod(x - 1, width) + Math.floorMod(y - 1, height) * width;
+                case 2: return Math.floorMod(tileIndex - 1, width) + Math.floorMod(y - 1, height) * width;
                 // Left
-                case 3: return Math.floorMod(x - 1, width) + y * width;
+                case 3: return Math.floorMod(tileIndex - 1, width) + y * width;
                 // Down-Left:
-                case 4: return Math.floorMod(x - 1, width) + (y + 1) * width;
+                case 4: return Math.floorMod(tileIndex - 1, width) + (y + 1) * width;
                 // Down-Right:
                 case 5: return tileIndex + width;
             }
         } else {
             switch (directionIndex) {
                 // Right
-                case 0: return Math.floorMod(x + 1, width) + y * width;
+                case 0: return Math.floorMod(tileIndex + 1, width) + y * width;
                 // Up-Right:
-                case 1: return Math.floorMod(x + 1, width) + (y - 1) * width;
+                case 1: return Math.floorMod(tileIndex + 1, width) + (y - 1) * width;
                 // Up-Left:
                 case 2: return tileIndex - width;
                 // Left
-                case 3: return Math.floorMod(x - 1, width) + y * width;
+                case 3: return Math.floorMod(tileIndex - 1, width) + y * width;
                 // Down-Left:
                 case 4: return Math.floorMod(tileIndex + width, size);
                 // Down-Right:
-                case 5: return Math.floorMod(x + 1, width) + Math.floorMod(y + 1, height) * width;
+                case 5: return Math.floorMod(tileIndex + 1, width) + Math.floorMod(y + 1, height) * width;
             }
         }
 
