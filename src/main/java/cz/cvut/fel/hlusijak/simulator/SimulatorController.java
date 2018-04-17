@@ -158,23 +158,18 @@ public class SimulatorController implements Initializable {
 
         intervalTextField.setText(Double.toString(this.intervalSeconds));
 
-        editModeComboBox.setCellFactory(listView -> {
-            ListCell<Integer> listCell = new ListCell<Integer>() {
-                @Override
-                protected void updateItem(Integer item, boolean empty) {
-                    super.updateItem(item, empty);
+        editModeComboBox.setCellFactory(listView -> new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
 
-                    if (item == null || empty) {
-                        return;
-                    }
-
-                    setText(Integer.toString(item));
-                    setBackground(new Background(new BackgroundFill(getCellColor(item), null, null)));
+                if (item == null || empty) {
+                    return;
                 }
-            };
 
-
-            return listCell;
+                setText(Integer.toString(item));
+                setBackground(new Background(new BackgroundFill(getCellColor(item), null, null)));
+            }
         });
 
         editModeComboBox.valueProperty().addListener(((observable, oldValue, newValue) -> {
@@ -189,19 +184,13 @@ public class SimulatorController implements Initializable {
                 Grid grid = simulator.getGrid();
 
                 grid.fillTileStates(getSelectedState());
-                simulator.setGrid(grid);
-                Arrays.stream(this.cellShapes)
-                        .forEach(CellShape::updateState);
+                Arrays.stream(this.cellShapes).forEach(CellShape::updateColor);
             }
         });
 
         randomizeButton.setOnAction(event -> {
             synchronized (simulator) {
-                Grid grid = simulator.getGrid();
-
-                grid.randomizeTileStates(new Random(), simulator.getRuleSet());
-
-                simulator.setGrid(grid);
+                simulator.getGrid().randomizeTileStates(new Random(), simulator.getRuleSet());
             }
 
             updateViewPane(null);
@@ -209,51 +198,47 @@ public class SimulatorController implements Initializable {
     }
 
     private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {
-        return FutureUtil.futureTaskJFX(() -> {
-            Simulator simulator = RuleSeeker.getInstance().getSimulator();
+        return FutureUtil.futureTaskJFX(() -> updateViewPane(iterationResult.getNextGrid()))
+            .thenApplyAsync(v -> {
+                while (true) {
+                    boolean loadedResumed;
+                    double loadedIntervalSeconds;
 
-            updateViewPane(simulator.getGrid());
-        })
-        .thenApplyAsync(v -> {
-            while (true) {
-                boolean loadedResumed;
-                double loadedIntervalSeconds;
+                    synchronized (simulationLock) {
+                        loadedResumed = this.resumed;
+                        loadedIntervalSeconds = this.intervalSeconds;
+                    }
 
+                    if (!loadedResumed) {
+                        return false;
+                    }
+
+                    Instant now = Instant.now();
+                    Duration durationElapsed = Duration.between(iterationResult.getComputationStart(), now);
+                    Duration requiredDuration = TimeUtil.ofSeconds(loadedIntervalSeconds);
+
+                    if (durationElapsed.compareTo(requiredDuration) > 0) {
+                        return true;
+                    }
+
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, FutureUtil.getBackgroundExecutor())
+            .thenApplyAsync(cont -> {
                 synchronized (simulationLock) {
-                    loadedResumed = this.resumed;
-                    loadedIntervalSeconds = this.intervalSeconds;
+                    this.resumeTaskRunning = cont && this.resumed;
+
+                    if (!this.resumeTaskRunning) {
+                        this.settingsTab.setDisable(false);
+                    }
+
+                    return this.resumeTaskRunning;
                 }
-
-                if (!loadedResumed) {
-                    return false;
-                }
-
-                Instant now = Instant.now();
-                Duration durationElapsed = Duration.between(iterationResult.getComputationStart(), now);
-                Duration requiredDuration = TimeUtil.ofSeconds(loadedIntervalSeconds);
-
-                if (durationElapsed.compareTo(requiredDuration) > 0) {
-                    return true;
-                }
-
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }, FutureUtil.getBackgroundExecutor())
-        .thenApplyAsync(cont -> {
-            synchronized (simulationLock) {
-                this.resumeTaskRunning = cont && this.resumed;
-
-                if (!this.resumeTaskRunning) {
-                    this.settingsTab.setDisable(false);
-                }
-
-                return this.resumeTaskRunning;
-            }
-        }, FutureUtil.getJFXExecutor());
+            }, FutureUtil.getJFXExecutor());
     }
 
     public Paint getCellColor(int state) {
@@ -268,9 +253,7 @@ public class SimulatorController implements Initializable {
         return Color.hsb(360.0 * ((state / (double) remainingStates + ruleSet.getHueOffset()) % 1.0), 0.8, 1.0);
     }
 
-    private Pair<Double, Vector2d> createTransformation() {
-        Simulator simulator = RuleSeeker.getInstance().getSimulator();
-        Grid grid = simulator.getGrid();
+    private Pair<Double, Vector2d> createTransformation(Grid grid) {
         Vector2d boundingBox = grid.getGeometry().getVertexBoundingBox();
         Vector2d paneSize = Vector2d.of(viewPane.getWidth(), viewPane.getHeight());
         Vector2d ratio = paneSize.div(boundingBox);
@@ -286,13 +269,13 @@ public class SimulatorController implements Initializable {
 
         if (grid == null) {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
-            finalGrid = simulator.getGrid();
+            finalGrid = simulator.getGrid().clone();
         } else {
             finalGrid = grid;
         }
 
         GridGeometry gridGeometry = finalGrid.getGeometry();
-        Pair<Double, Vector2d> transformation = createTransformation();
+        Pair<Double, Vector2d> transformation = createTransformation(finalGrid);
         double scale = transformation.getValue0();
         Vector2d offset = transformation.getValue1();
 
@@ -300,7 +283,7 @@ public class SimulatorController implements Initializable {
 
         this.cellShapes = gridGeometry.tileIndexStream().boxed().map(tileIndex -> {
             int state = finalGrid.getTileState(tileIndex);
-            CellShape cellShape = new CellShape(this, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
+            CellShape cellShape = new CellShape(this, tileIndex, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
                     .map(vertex -> vertex.mul(scale))
                     .map(offset::add).toArray(Vector2d[]::new));
 

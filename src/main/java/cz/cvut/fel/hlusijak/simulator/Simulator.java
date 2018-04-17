@@ -120,7 +120,7 @@ public class Simulator {
     }
 
     public synchronized Grid getGrid() {
-        return grid.clone();
+        return grid;
     }
 
     public synchronized void setGrid(Grid grid) {

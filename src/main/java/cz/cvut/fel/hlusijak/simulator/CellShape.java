@@ -1,26 +1,23 @@
 package cz.cvut.fel.hlusijak.simulator;
 
-import com.sun.javafx.css.Rule;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 import javafx.scene.input.InputEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 
 public class CellShape extends Polygon {
-    private Simulator simulator;
-    private SimulatorController simulatorController;
-    private int index;
-    private int state;
+    private final Simulator simulator;
+    private final SimulatorController simulatorController;
+    private final int index;
 
-    public CellShape(SimulatorController simulatorController, int state, Vector2d... vertices) {
+    public CellShape(SimulatorController simulatorController, int index, int state, Vector2d... vertices) {
         super();
 
         this.simulator = RuleSeeker.getInstance().getSimulator();
         this.simulatorController = simulatorController;
+        this.index = index;
 
         for (Vector2d vertex : vertices) {
             getPoints().addAll(vertex.getX(), vertex.getY());
@@ -37,25 +34,30 @@ public class CellShape extends Polygon {
         });
         setOnMouseDragEntered(this::onClick);
 
-        setState(state);
+        updateColor(state);
     }
 
     private void onClick(InputEvent event) {
-        setState(simulatorController.getSelectedState());
-        simulator.getGrid().setTileState(index, this.state);
+        int state = simulatorController.getSelectedState();
+
+        synchronized (this.simulator) {
+            simulator.getGrid().setTileState(index, state);
+        }
+
+        updateColor(state);
     }
 
-    public void setState(int state) {
-        this.state = state;
-
-        updateColor();
-    }
-
-    public void updateState() {
-        setState(this.simulator.getGrid().getTileState(index));
+    public void updateColor(int state) {
+        fillProperty().setValue(simulatorController.getCellColor(state));
     }
 
     public void updateColor() {
-        fillProperty().setValue(simulatorController.getCellColor(this.state));
+        synchronized (this.simulator) {
+            updateColor(this.simulator.getGrid().getTileState(index));
+        }
+    }
+
+    public int getTileIndex() {
+        return index;
     }
 }
