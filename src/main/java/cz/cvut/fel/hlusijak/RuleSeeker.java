@@ -2,26 +2,18 @@ package cz.cvut.fel.hlusijak;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import cz.cvut.fel.hlusijak.Master;
-import cz.cvut.fel.hlusijak.Slave;
 import cz.cvut.fel.hlusijak.command.Args;
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.command.CommandSlave;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
 import cz.cvut.fel.hlusijak.simulator.SimulatorApplication;
-import cz.cvut.fel.hlusijak.simulator.grid.Grid;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
 import javafx.application.Application;
 
-import java.lang.Runnable;
-import java.util.Random;
-import java.util.Properties;
 import java.io.IOException;
+import java.util.Properties;
 
 public class RuleSeeker implements Runnable {
+    public static boolean DEBUG = true;
     private static RuleSeeker instance;
     private String[] rawArgs;
     private String projectArtifactId;
@@ -45,9 +37,11 @@ public class RuleSeeker implements Runnable {
         this.projectVersion = (String) properties.get("project.version");
         this.gitCommitId = (String) properties.get("git.commit.id");
 
+        System.out.printf("-----------------------------------------------------------\n");
         System.out.printf("%s\n", this.projectArtifactId);
         System.out.printf("\tVersion: %s\n", this.projectVersion);
         System.out.printf("\tCommit ID: %s\n", this.gitCommitId);
+        System.out.printf("-----------------------------------------------------------\n");
     }
 
     public Simulator setSimulator(Simulator simulator) {
