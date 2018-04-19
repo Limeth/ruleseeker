@@ -5,18 +5,21 @@ import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
-public class SumRuleSet implements RuleSet {
-    private final GridGeometry gridGeometry;
-    private final int states;
-    private final int neighbouringStateCombinations;
-    private int[] rules;
+public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
+    protected final G gridGeometry;
+    protected final int states;
+    protected final int neighbouringStateCombinations;
+    protected int[] rules;
 
-    public SumRuleSet(GridGeometry gridGeometry, int states, int[] rules) {
+    public SumRuleSet(G gridGeometry, int states, int[] rules) {
         Preconditions.checkNotNull(gridGeometry);
         Preconditions.checkArgument(states >= 2, "The number of states must be at least 2.");
 
-        this.neighbouringStateCombinations = Math.toIntExact(combinationsWithRepetitions(gridGeometry.getNeighbourCount(), states));
+        this.gridGeometry = gridGeometry;
+        this.states = states;
+        this.neighbouringStateCombinations = Math.toIntExact(combinationsWithRepetitions(getNeighbourhoodSize(), states));
         int requiredRulesLen = states * neighbouringStateCombinations;
 
         if (rules == null) {
@@ -26,14 +29,15 @@ public class SumRuleSet implements RuleSet {
                     String.format("The rules array must be of length %d, but is of length %d", requiredRulesLen, rules.length));
         }
 
-        this.gridGeometry = gridGeometry;
-        this.states = states;
         this.rules = rules;
     }
 
-    public SumRuleSet(GridGeometry gridGeometry, int states) {
+    public SumRuleSet(G gridGeometry, int states) {
         this(gridGeometry, states, null);
     }
+
+    public abstract int getNeighbourhoodSize();
+    public abstract IntStream neighbourhoodTileIndicesStream(int tileIndex);
 
     public int[] getRules() {
         return rules;
@@ -54,7 +58,7 @@ public class SumRuleSet implements RuleSet {
     private int[] countNeighbouringStates(Grid grid, int tileIndex) {
         int[] stateCount = new int[states];
 
-        gridGeometry.neighbouringTileIndicesStream(tileIndex)
+        neighbourhoodTileIndicesStream(tileIndex)
                 .map(grid::getTileState)
                 .forEach(state -> stateCount[state] += 1);
 

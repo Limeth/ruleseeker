@@ -2,6 +2,8 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import cz.cvut.fel.hlusijak.util.Vector2d;
 
+import java.util.stream.IntStream;
+
 /**
  * a grid of squares.
  *
@@ -17,7 +19,7 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
     }
 
     @Override
-    public int getNeighbourCount() {
+    public int getEdgeNeighbourhoodSize() {
         return 4;
     }
 
@@ -55,5 +57,24 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
             Vector2d.of(x + 1, y + 1),
             Vector2d.of(x, y + 1),
         };
+    }
+
+    @Override
+    public int getVertexNeighbourhoodSize() {
+        return 8;
+    }
+
+    @Override
+    public IntStream vertexNeighbourhoodTileIndicesStream(int tileIndex) {
+        return IntStream.of(
+                getNeighbouringTileIndex(tileIndex, 0),
+                getNeighbouringTileIndex(tileIndex, 0, 1),
+                getNeighbouringTileIndex(tileIndex, 1),
+                getNeighbouringTileIndex(tileIndex, 1, 2),
+                getNeighbouringTileIndex(tileIndex, 2),
+                getNeighbouringTileIndex(tileIndex, 2, 3),
+                getNeighbouringTileIndex(tileIndex, 3),
+                getNeighbouringTileIndex(tileIndex, 3, 0)
+        );
     }
 }

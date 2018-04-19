@@ -3,6 +3,8 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 
+import java.util.stream.IntStream;
+
 /**
  * A grid of hexagons.
  *
@@ -26,7 +28,7 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
     }
 
     @Override
-    public int getNeighbourCount() {
+    public int getEdgeNeighbourhoodSize() {
         return 6;
     }
 
@@ -89,5 +91,15 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
                 Vector2d.of(offsetX + (x + 0.5) * TILE_WIDTH, y * yCoordMultiplier + 2.0),
                 Vector2d.of(offsetX + (x + 1) * TILE_WIDTH, y * yCoordMultiplier + 1.5),
         };
+    }
+
+    @Override
+    public int getVertexNeighbourhoodSize() {
+        return getEdgeNeighbourhoodSize();
+    }
+
+    @Override
+    public IntStream vertexNeighbourhoodTileIndicesStream(int tileIndex) {
+        return edgeNeighbourhoodTileIndicesStream(tileIndex);
     }
 }

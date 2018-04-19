@@ -25,21 +25,32 @@ public class Slave extends Listener implements Runnable {
     public void run() {
         validateOptions();
 
+        int port = Optional.ofNullable(options.masterPort).orElse(Network.SERVER_PORT_DEFAULT);
         Client client = new Client();
 
         Network.register(client);
         client.addListener(this);
         client.start();
 
-        try {
-            client.connect(Network.CONNECTION_TIMEOUT_MILLIS, options.masterAddress, Optional.ofNullable(options.masterPort).orElse(Network.SERVER_PORT_DEFAULT));
-        } catch (IOException e) {
-            LOGGER.error("Could not connect to the server: {}", e.getLocalizedMessage());
-            System.exit(2);
-        }
+        while (!Thread.interrupted()) {
+            LOGGER.info("Connecting as a slave to /{}:{}", options.masterAddress, port);
 
-        // Consider running asynchronously via new Thread(client).start()
-        while (true) {}
+            try {
+                client.connect(Network.CONNECTION_TIMEOUT_MILLIS, options.masterAddress, port);
+            } catch (IOException e) {
+                LOGGER.warn("Connection attempt failed: {}", e.getLocalizedMessage());
+                LOGGER.warn("Retrying in {} seconds", (double) Network.CONNECTION_RETRY_PERIOD / 1000.0);
+
+                try {
+                    Thread.sleep(Network.CONNECTION_RETRY_PERIOD);
+                } catch (InterruptedException e1) {
+                    System.exit(0);
+                }
+            }
+
+            // Consider running asynchronously via new Thread(client).start()
+            while (client.isConnected() && !Thread.interrupted()) {}
+        }
     }
 
     private void validateOptions() {

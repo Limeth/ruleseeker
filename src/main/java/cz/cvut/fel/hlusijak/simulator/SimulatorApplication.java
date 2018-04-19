@@ -3,9 +3,9 @@ package cz.cvut.fel.hlusijak.simulator;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -28,8 +28,8 @@ public class SimulatorApplication extends Application {
 
     private void initSimulator() {
         Random rng = new Random();
-        GridGeometry gridGeometry = new SquareGridGeometry(20, 20);
-        RuleSet ruleSet = new SumRuleSet(gridGeometry, 10);
+        GridGeometry gridGeometry = new TriangleGridGeometry(128, 64);
+        RuleSet ruleSet = new VertexSumRuleSet(gridGeometry, 4);
 
         ruleSet.randomizeRules(rng);
 
