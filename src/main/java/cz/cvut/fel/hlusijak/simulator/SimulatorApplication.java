@@ -4,6 +4,8 @@ import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
 import javafx.application.Application;
@@ -37,7 +39,8 @@ public class SimulatorApplication extends Application {
 
         grid.randomizeTileStates(rng, ruleSet);
 
-        Simulator simulator = new Simulator(grid, ruleSet, 10);
+        StateColoringMethod stateColoringMethod = new HueStateColoringMethod();
+        Simulator simulator = new Simulator(grid, ruleSet, stateColoringMethod, 10);
 
         RuleSeeker.getInstance().setSimulator(simulator);
     }

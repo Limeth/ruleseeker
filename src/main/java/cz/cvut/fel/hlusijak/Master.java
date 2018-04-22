@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.google.common.collect.Sets;
+
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
 import cz.cvut.fel.hlusijak.network.ConnectionResultPacket;
@@ -66,13 +67,18 @@ public class Master extends Listener implements Runnable {
                 response = new ConnectionResultPacket(null);
                 close = false;
 
-                LOGGER.info("Approved connection request from {}, registering as {}", connection.getRemoteAddressTCP(), connection);
+                LOGGER.info("Approved connection request from {}, registering as {}", connection.getRemoteAddressTCP(),
+                        connection);
                 approvedConnections.add(connection);
             } else {
-                response = new ConnectionResultPacket("Different commit id, are you sure you're up to date with the server version? Server: '" + RuleSeeker.getInstance().getGitCommitId() + "' Client: '" + crp.getGitCommitId() + "'");
+                response = new ConnectionResultPacket(
+                        "Different commit id, are you sure you're up to date with the server version? Server: '"
+                                + RuleSeeker.getInstance().getGitCommitId() + "' Client: '" + crp.getGitCommitId()
+                                + "'");
                 close = true;
 
-                LOGGER.info("Rejected connection request from {}, reason: {}", connection.getRemoteAddressTCP(), response.getError().get());
+                LOGGER.info("Rejected connection request from {}, reason: {}", connection.getRemoteAddressTCP(),
+                        response.getError().get());
             }
 
             connection.sendTCP(response);
@@ -81,7 +87,8 @@ public class Master extends Listener implements Runnable {
                 connection.close();
             }
         } else {
-            LOGGER.info("Received unexpected packet from {}, closing connection", connection.getRemoteAddressTCP().toString());
+            LOGGER.info("Received unexpected packet from {}, closing connection",
+                    connection.getRemoteAddressTCP().toString());
             connection.close();
         }
     }

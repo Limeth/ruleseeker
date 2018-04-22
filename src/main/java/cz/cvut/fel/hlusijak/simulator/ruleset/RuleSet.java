@@ -61,4 +61,6 @@ public interface RuleSet {
     default double getHueOffset() {
         return new Random(Arrays.hashCode(getRules())).nextDouble();
     }
+
+    RuleSet copy();
 }

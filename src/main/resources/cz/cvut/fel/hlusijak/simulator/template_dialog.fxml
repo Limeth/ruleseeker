@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<DialogPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+            <Tab text="Grid">
+               <content>
+                  <GridPane hgap="16.0" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" vgap="12.0">
+                    <columnConstraints>
+                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
+                      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Geometry" />
+                        <ChoiceBox fx:id="gridGeometryChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                        <Label text="Width" GridPane.rowIndex="1" />
+                        <Spinner fx:id="gridWidthSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="Height" GridPane.rowIndex="2" />
+                        <Spinner fx:id="gridHeightSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Cell states" GridPane.rowIndex="3" />
+                        <Spinner fx:id="gridCellStatesSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                     </children>
+                     <padding>
+                        <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
+                     </padding>
+                  </GridPane>
+               </content>
+            </Tab>
+            <Tab text="Rule Set">
+               <content>
+                  <VBox>
+                     <children>
+                        <GridPane hgap="16.0" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" vgap="12.0">
+                           <columnConstraints>
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
+                              <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <Label text="Type" />
+                              <ChoiceBox fx:id="ruleSetTypeChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                           </children>
+                           <padding>
+                              <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
+                           </padding>
+                        </GridPane>
+                        <HBox spacing="16.0">
+                           <children>
+                              <Button fx:id="ruleSetResetRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reset rules" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="ruleSetRandomizeRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Randomize rules" HBox.hgrow="ALWAYS" />
+                           </children>
+                           <padding>
+                              <Insets bottom="12.0" left="16.0" right="16.0" />
+                           </padding>
+                        </HBox>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                           <content>
+                              <VBox fx:id="ruleSetVBox" prefHeight="200.0" prefWidth="100.0" />
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            <Tab text="State Colors">
+               <content>
+                  <VBox>
+                     <children>
+                        <GridPane hgap="16.0" vgap="12.0">
+                          <columnConstraints>
+                            <ColumnConstraints />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Method" />
+                              <ChoiceBox fx:id="stateColorsMethodChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                           </children>
+                           <padding>
+                              <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
+                           </padding>
+                        </GridPane>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                           <content>
+                              <VBox fx:id="stateColorsVBox" prefHeight="200.0" prefWidth="100.0" />
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+         </tabs>
+         <padding>
+            <Insets bottom="1.0" />
+         </padding>
+      </TabPane>
+   </content>
+   <buttonTypes>
+      <ButtonType fx:constant="CANCEL" />
+      <ButtonType fx:constant="FINISH" />
+   </buttonTypes>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+</DialogPane>

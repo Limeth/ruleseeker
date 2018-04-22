@@ -22,4 +22,9 @@ public class EdgeSumRuleSet extends SumRuleSet<GridGeometry> {
     public IntStream neighbourhoodTileIndicesStream(int tileIndex) {
         return this.gridGeometry.edgeNeighbourhoodTileIndicesStream(tileIndex);
     }
+
+    @Override
+    public EdgeSumRuleSet copy() {
+        return new EdgeSumRuleSet(gridGeometry, states, rules);
+    }
 }

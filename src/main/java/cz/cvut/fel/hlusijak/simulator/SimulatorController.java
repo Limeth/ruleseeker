@@ -31,16 +31,10 @@ import java.util.concurrent.CompletableFuture;
 public class SimulatorController implements Initializable {
     @FXML private Pane viewPane;
 
-    // Settings tab
-    @FXML private Tab settingsTab;
-    @FXML private Button importRulesOrStateButton;
-    @FXML private Button exportStateButton;
-    @FXML private Spinner<Integer> widthSpinner;
-    @FXML private Spinner<Integer> heightSpinner;
-    @FXML private CheckBox customStateColorsCheckBox;
-    @FXML private HBox customStateColorsHBox;
-    @FXML private ChoiceBox<Integer> customStateColorsStateChoiceBox;
-    @FXML private ColorPicker customStateColorsColorPicker;
+    // ToolBar
+    @FXML private Button loadButton;
+    @FXML private Button saveButton;
+    @FXML private Button settingsButton;
 
     // Simulation tab
     @FXML private Button resumeButton;
@@ -68,7 +62,8 @@ public class SimulatorController implements Initializable {
         hueOffset = RuleSeeker.getInstance().getSimulator().getRuleSet().getHueOffset();
 
         initializeView();
-        initializeSimulationTab();
+        initializeToolbar();
+        initializeSidePane();
     }
 
     private void initializeView() {
@@ -87,7 +82,13 @@ public class SimulatorController implements Initializable {
         viewPane.setOnMouseReleased(event -> mouseHeld = false);
     }
 
-    private void initializeSimulationTab() {
+    private void initializeToolbar() {
+        settingsButton.setOnAction(event -> {
+            SettingsDialog.open();
+        });
+    }
+
+    private void initializeSidePane() {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
         resumeButton.setOnAction(event -> {
@@ -99,7 +100,7 @@ public class SimulatorController implements Initializable {
                 }
 
                 resumeTaskRunning = true;
-                settingsTab.setDisable(true);
+                settingsButton.setDisable(true);
                 simulator.runAsync(this::onIterationComplete);
             }
         });
@@ -233,7 +234,7 @@ public class SimulatorController implements Initializable {
                     this.resumeTaskRunning = cont && this.resumed;
 
                     if (!this.resumeTaskRunning) {
-                        this.settingsTab.setDisable(false);
+                        this.settingsButton.setDisable(false);
                     }
 
                     return this.resumeTaskRunning;

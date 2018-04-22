@@ -22,4 +22,9 @@ public class VertexSumRuleSet extends SumRuleSet<GridGeometry> {
     public IntStream neighbourhoodTileIndicesStream(int tileIndex) {
         return gridGeometry.vertexNeighbourhoodTileIndicesStream(tileIndex);
     }
+
+    @Override
+    public VertexSumRuleSet copy() {
+        return new VertexSumRuleSet(gridGeometry, states, rules);
+    }
 }

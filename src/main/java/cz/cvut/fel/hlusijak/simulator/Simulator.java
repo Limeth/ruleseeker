@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
 import cz.cvut.fel.hlusijak.util.Wrapper;
 
@@ -14,12 +15,14 @@ import java.util.function.Supplier;
 public class Simulator {
     private Grid grid;
     private RuleSet ruleSet;
+    private StateColoringMethod stateColoringMethod;
     private int iteration;
     private int cellsPerTask;
 
-    public Simulator(Grid grid, RuleSet ruleSet, int cellsPerTask) {
+    public Simulator(Grid grid, RuleSet ruleSet, StateColoringMethod stateColoringMethod, int cellsPerTask) {
         this.grid = grid;
         this.ruleSet = ruleSet;
+        this.stateColoringMethod = stateColoringMethod;
         this.iteration = 0;
         this.cellsPerTask = cellsPerTask;
     }
@@ -145,5 +148,10 @@ public class Simulator {
 
     public synchronized void setCellsPerTask(int cellsPerTask) {
         this.cellsPerTask = cellsPerTask;
+    }
+
+    @Override
+    public Simulator clone() {
+        return new Simulator(grid.clone(), ruleSet.copy(), stateColoringMethod.copy(), cellsPerTask);
     }
 }
