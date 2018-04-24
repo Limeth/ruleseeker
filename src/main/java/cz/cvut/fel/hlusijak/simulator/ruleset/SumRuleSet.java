@@ -85,8 +85,6 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
                 int combinationIndex = index % this.neighbouringStateCombinations;
                 int[] stateCount = combinationWithRepetition(neighbourhoodSize, states, combinationIndex);
 
-                System.out.println(index + " " + Arrays.toString(stateCount));
-
                 return new SumRuleRecord(index, previousState, stateCount, rules[index]);
             });
     }

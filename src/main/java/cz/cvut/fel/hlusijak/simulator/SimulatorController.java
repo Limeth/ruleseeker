@@ -24,6 +24,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -159,26 +160,8 @@ public class SimulatorController implements Initializable {
 
         intervalTextField.setText(Double.toString(this.intervalSeconds));
 
-        editModeComboBox.setCellFactory(listView -> new ListCell<Integer>() {
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (item == null || empty) {
-                    return;
-                }
-
-                setText(Integer.toString(item));
-                setBackground(new Background(new BackgroundFill(getCellColor(item), null, null)));
-            }
-        });
-
-        editModeComboBox.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            editModeComboBox.setBackground(new Background(new BackgroundFill(getCellColor(newValue), null, null)));
-        }));
-
-        RuleSeeker.getInstance().getSimulator().getRuleSet().stateStream().forEach(editModeComboBox.itemsProperty().get()::add);
-        editModeComboBox.setValue(editModeComboBox.getItems().get(0));
+        buildStateComboBox(editModeComboBox, simulator);
+        editModeComboBox.getSelectionModel().selectFirst();
 
         fillButton.setOnAction(event -> {
             synchronized (simulator) {
@@ -196,6 +179,40 @@ public class SimulatorController implements Initializable {
 
             updateViewPane(null);
         });
+    }
+
+    public static ComboBox<Integer> buildStateComboBox(ComboBox<Integer> comboBoxArg, Simulator simulator) {
+        final ComboBox<Integer> comboBox;
+
+        if (comboBoxArg == null) {
+            comboBox = new ComboBox<>();
+        } else {
+            comboBox = comboBoxArg;
+        }
+
+        List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
+
+        comboBox.setCellFactory(listView -> new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item == null || empty) {
+                    return;
+                }
+
+                setText(Integer.toString(item));
+                setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
+            }
+        });
+
+        comboBox.valueProperty().addListener(((observable, oldValue, newValue) -> {
+            comboBox.setBackground(new Background(new BackgroundFill(stateColors.get(newValue), null, null)));
+        }));
+
+        simulator.getRuleSet().stateStream().forEach(comboBox.itemsProperty().get()::add);
+
+        return comboBox;
     }
 
     private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {
@@ -240,18 +257,6 @@ public class SimulatorController implements Initializable {
                     return this.resumeTaskRunning;
                 }
             }, FutureUtil.getJFXExecutor());
-    }
-
-    public Paint getCellColor(int state) {
-        if (state == 0) {
-            return Color.WHITE;
-        }
-
-        RuleSet ruleSet = RuleSeeker.getInstance().getSimulator().getRuleSet();
-        int remainingStates = ruleSet.getNumberOfStates() - 1;
-        state = state % remainingStates;
-
-        return Color.hsb(360.0 * ((state / (double) remainingStates + ruleSet.getHueOffset()) % 1.0), 0.8, 1.0);
     }
 
     private Pair<Double, Vector2d> createTransformation(Grid grid) {

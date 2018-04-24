@@ -93,11 +93,7 @@
                               <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
                            </padding>
                         </HBox>
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
-                           <content>
-                              <VBox fx:id="ruleSetVBox" prefHeight="100.0" />
-                           </content>
-                        </ScrollPane>
+                        <ScrollPane fx:id="ruleSetScrollPane" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
                </content>
@@ -122,11 +118,7 @@
                               <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
                            </padding>
                         </GridPane>
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
-                           <content>
-                              <VBox fx:id="stateColorsVBox" prefHeight="100.0" />
-                           </content>
-                        </ScrollPane>
+                        <ScrollPane fx:id="stateColorsScrollPane" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
                </content>

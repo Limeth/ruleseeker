@@ -138,6 +138,14 @@ public class Simulator {
         this.ruleSet = ruleSet;
     }
 
+    public synchronized StateColoringMethod getStateColoringMethod() {
+        return stateColoringMethod;
+    }
+
+    public synchronized void setStateColoringMethod(StateColoringMethod stateColoringMethod) {
+        this.stateColoringMethod = stateColoringMethod;
+    }
+
     public synchronized int getIterationsExecuted() {
         return iteration;
     }

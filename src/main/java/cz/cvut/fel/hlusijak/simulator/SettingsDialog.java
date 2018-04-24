@@ -1,10 +1,11 @@
-package cz.cvut.fel.hlusijak.simulator;
+ package cz.cvut.fel.hlusijak.simulator;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import com.google.common.base.Preconditions;
 
@@ -26,6 +27,7 @@ import cz.cvut.fel.hlusijak.util.Vector2i;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.util.StringConverter;
@@ -50,12 +52,13 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
     @FXML private Spinner<Integer> ruleSetCellStatesSpinner;
     @FXML private Button ruleSetResetRulesButton;
     @FXML private Button ruleSetRandomizeRulesButton;
-    @FXML private VBox ruleSetVBox;
+    @FXML private ScrollPane ruleSetScrollPane;
     // }}}
 
     // State Colors tab {{{
     @FXML private ChoiceBox<Item<? extends StateColoringMethod>> stateColorsMethodChoiceBox;
     @FXML private VBox stateColorsVBox;
+    @FXML private ScrollPane stateColorsScrollPane;
     // }}}
 
     private SettingsDialog(Simulator simulator) {
@@ -153,39 +156,84 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         });
         ruleSetCellStatesSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (!oldValue.equals(newValue)) {
+                int[] rules = simulator.getRuleSet().getRules();
+
+                for (int ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
+                    if (rules[ruleIndex] >= newValue) {
+                        rules[ruleIndex] = 0;
+                    }
+                }
+
                 updateRuleSet();
             }
         });
     }
 
     private void updateRuleSet() {
-        RuleSet ruleSet = ruleSetTypeChoiceBox.getValue().constructor.get();
+        RuleSet previousRuleSet = simulator.getRuleSet();
+        int[] previousRules = previousRuleSet.getRules();
+        RuleSet nextRuleSet = ruleSetTypeChoiceBox.getValue().constructor.get();
+        int[] nextRules = nextRuleSet.getRules();
 
-        simulator.setRuleSet(ruleSet);
+        System.arraycopy(previousRules, 0, nextRules, 0, Math.min(previousRules.length, nextRules.length));
+
+        simulator.setRuleSet(nextRuleSet);
         renderRuleView();
     }
 
     private void renderRuleView() {
-        SumRuleSet ruleSet = (SumRuleSet) simulator.getRuleSet();
+        SumRuleSet<?> ruleSet = (SumRuleSet) simulator.getRuleSet();
+        int neighbourhoodSize = ruleSet.getNeighbourhoodSize();
+        final GridPane grid = new GridPane();
 
-        ruleSetVBox.getChildren().clear();
+        grid.add(new Label("Previous"), 0, 0);
+        grid.add(new Label("Neighbours"), 1, 0, neighbourhoodSize, 1);
+        grid.add(new Label("Next"), neighbourhoodSize + 1, 0);
         ruleSet.enumerateRules()
             .forEach(rule -> {
-                HBox pane = new HBox();
+                Node[] row = new Node[neighbourhoodSize + 2];
+                row[0] = buildStateNode(rule.getPreviousState());
+                int[] stateCount = rule.getStateCount();
+                int state = 0;
 
-                Polygon polygon = new Polygon(0, 0, 10, 0, 10, 10, 0, 10);
+                for (int neighbourIndex = 0; neighbourIndex < neighbourhoodSize; neighbourIndex++) {
+                    while (stateCount[state] <= 0) {
+                        state++;
+                    }
 
-                // TODO, possibly isolate to separate class
-                polygon.setFill(Color.RED);
-                polygon.setLayoutX(0);
-                polygon.setLayoutY(0);
-                polygon.setStrokeType(StrokeType.CENTERED);
-                polygon.setStroke(Color.BLACK);
+                    row[neighbourIndex + 1] = buildStateNode(state);
+                    stateCount[state]--;
+                }
 
-                pane.getChildren().add(polygon);
+                ComboBox<Integer> nextStateComboBox = new ComboBox<>();
 
-                ruleSetVBox.getChildren().add(pane);
+                ruleSet.stateStream().forEach(nextStateComboBox.getItems()::add);
+
+                ComboBox<Integer> stateComboBox = SimulatorController.buildStateComboBox(null, simulator);
+
+                stateComboBox.getSelectionModel().select(rule.getNextState());
+                stateComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+                    ruleSet.getRules()[rule.getIndex()] = newValue.intValue();
+                });
+
+                row[row.length - 1] = stateComboBox;
+
+                grid.addRow(rule.getIndex() + 1, row);
             });
+        ruleSetScrollPane.setContent(grid);
+    }
+
+    private Node buildStateNode(int state) {
+        final int POLYGON_SIZE = 20;
+        Polygon polygon = new Polygon(0, 0, POLYGON_SIZE, 0, POLYGON_SIZE, POLYGON_SIZE, 0, POLYGON_SIZE);
+
+        polygon.setFill(Color.RED);
+        polygon.setLayoutX(0);
+        polygon.setLayoutY(0);
+        polygon.setStrokeType(StrokeType.CENTERED);
+        polygon.setStroke(Color.BLACK);
+
+        return polygon;
     }
 
     private void roundIntegerSpinnerValue(Spinner<Integer> spinner) {

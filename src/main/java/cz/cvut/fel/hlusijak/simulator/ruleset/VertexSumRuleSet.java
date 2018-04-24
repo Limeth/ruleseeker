@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class VertexSumRuleSet extends SumRuleSet<GridGeometry> {
@@ -25,6 +26,6 @@ public class VertexSumRuleSet extends SumRuleSet<GridGeometry> {
 
     @Override
     public VertexSumRuleSet copy() {
-        return new VertexSumRuleSet(gridGeometry, states, rules);
+        return new VertexSumRuleSet(gridGeometry, states, Arrays.copyOf(rules, rules.length));
     }
 }

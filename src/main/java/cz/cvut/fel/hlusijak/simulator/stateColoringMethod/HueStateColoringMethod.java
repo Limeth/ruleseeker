@@ -17,7 +17,7 @@ public class HueStateColoringMethod implements StateColoringMethod {
     public List<Paint> getColors(RuleSet ruleSet) {
         int states = ruleSet.getNumberOfStates();
 
-        if (cached != null && states == cached.size()) {
+        if (cached != null) {
             return cached;
         }
 

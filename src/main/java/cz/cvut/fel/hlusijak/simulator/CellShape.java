@@ -48,7 +48,7 @@ public class CellShape extends Polygon {
     }
 
     public void updateColor(int state) {
-        fillProperty().setValue(simulatorController.getCellColor(state));
+        fillProperty().setValue(simulator.getStateColoringMethod().getColors(simulator.getRuleSet()).get(state));
     }
 
     public void updateColor() {
