@@ -3,9 +3,11 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleRecord;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     protected final G gridGeometry;
@@ -72,6 +74,21 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
         int ruleIndex = state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
 
         return rules[ruleIndex];
+    }
+
+    public Stream<SumRuleRecord> enumerateRules() {
+        final int neighbourhoodSize = getNeighbourhoodSize();
+
+        return IntStream.range(0, rules.length).boxed()
+            .map(index -> {
+                int previousState = index / this.neighbouringStateCombinations;
+                int combinationIndex = index % this.neighbouringStateCombinations;
+                int[] stateCount = combinationWithRepetition(neighbourhoodSize, states, combinationIndex);
+
+                System.out.println(index + " " + Arrays.toString(stateCount));
+
+                return new SumRuleRecord(index, previousState, stateCount, rules[index]);
+            });
     }
 
     private static long binomial(int n, int k) {

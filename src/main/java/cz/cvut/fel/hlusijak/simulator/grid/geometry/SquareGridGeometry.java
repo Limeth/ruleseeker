@@ -1,6 +1,7 @@
 package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import cz.cvut.fel.hlusijak.util.Vector2d;
+import cz.cvut.fel.hlusijak.util.Vector2i;
 
 import java.util.stream.IntStream;
 
@@ -14,8 +15,8 @@ import java.util.stream.IntStream;
  * |_|_|_|_|
  */
 public class SquareGridGeometry extends AbstractRectangularGridGeometry {
-    public SquareGridGeometry(int width, int height) {
-        super(width, height);
+    public SquareGridGeometry(Vector2i dimensions) {
+        super(dimensions);
     }
 
     @Override
@@ -25,6 +26,8 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
+        int width = getDimensions().getX();
+        int size = getSize();
         int y = tileIndex / width;
 
         switch (directionIndex) {
@@ -43,11 +46,12 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public Vector2d getVertexBoundingBox() {
-        return Vector2d.of(width, height);
+        return getDimensions().floatingPoint();
     }
 
     @Override
     public Vector2d[] getTileVertices(int tileIndex) {
+        int width = getDimensions().getX();
         int x = tileIndex % width;
         int y = tileIndex / width;
 

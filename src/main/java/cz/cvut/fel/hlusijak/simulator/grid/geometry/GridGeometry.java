@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.util.Vector2d;
+import cz.cvut.fel.hlusijak.util.Vector2i;
 
 import java.util.stream.IntStream;
 
@@ -17,9 +18,18 @@ public interface GridGeometry {
     int getEdgeNeighbourhoodSize();
 
     /**
+     * @return The dimensions of the grid in a plane.
+     */
+    Vector2i getDimensions();
+
+    /**
      * @return The total number of tiles in this grid.
      */
-    int getSize();
+    default int getSize() {
+        Vector2i dimensions = getDimensions();
+
+        return dimensions.getX() * dimensions.getY();
+    }
 
     /**
      * @param tileIndex The index of the current tile.

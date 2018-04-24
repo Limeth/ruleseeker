@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.util.Vector2d;
+import cz.cvut.fel.hlusijak.util.Vector2i;
 
 import java.util.stream.IntStream;
 
@@ -22,9 +23,9 @@ import java.util.stream.IntStream;
 public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
     private static final double TILE_WIDTH = Math.sqrt(3);
 
-    public HexagonGridGeometry(int width, int height) {
-        super(width, height);
-        Preconditions.checkArgument(height % 2 == 0, "The height must be even.");
+    public HexagonGridGeometry(Vector2i dimensions) {
+        super(dimensions);
+        Preconditions.checkArgument(dimensions.getY() % 2 == 0, "The height must be even.");
     }
 
     @Override
@@ -34,6 +35,9 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
+        int width = getDimensions().getX();
+        int height = getDimensions().getY();
+        int size = getSize();
         int y = tileIndex / width;
 
         if (y % 2 == 0) {
@@ -73,11 +77,14 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public Vector2d getVertexBoundingBox() {
-        return Vector2d.of((width + 0.5) * TILE_WIDTH, height * 1.5 + 0.5);
+        Vector2i dimensions = getDimensions();
+
+        return Vector2d.of((dimensions.getX() + 0.5) * TILE_WIDTH, dimensions.getY() * 1.5 + 0.5);
     }
 
     @Override
     public Vector2d[] getTileVertices(int tileIndex) {
+        int width = getDimensions().getX();
         int x = tileIndex % width;
         int y = tileIndex / width;
         double yCoordMultiplier = 1.5;

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -15,6 +16,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <DialogPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <content>
@@ -32,7 +34,6 @@
                       <RowConstraints vgrow="SOMETIMES" />
                       <RowConstraints vgrow="SOMETIMES" />
                         <RowConstraints vgrow="SOMETIMES" />
-                        <RowConstraints vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <Label text="Geometry" />
@@ -41,9 +42,7 @@
                         <Spinner fx:id="gridWidthSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Height" GridPane.rowIndex="2" />
                         <Spinner fx:id="gridHeightSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Label text="Cell states" GridPane.rowIndex="3" />
-                        <Spinner fx:id="gridCellStatesSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      </children>
                      <padding>
                         <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
@@ -62,27 +61,41 @@
                            </columnConstraints>
                            <rowConstraints>
                               <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
-                              <Label text="Type" />
+                              <Label text="Rule set type" />
                               <ChoiceBox fx:id="ruleSetTypeChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                              <Label text="Cell states" GridPane.rowIndex="1" />
+                              <Spinner fx:id="ruleSetCellStatesSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                            </children>
                            <padding>
                               <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
                            </padding>
                         </GridPane>
+                        <Separator prefWidth="200.0" />
+                        <Label text="Rules">
+                           <padding>
+                              <Insets left="16.0" right="16.0" top="12.0" />
+                           </padding>
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Label>
                         <HBox spacing="16.0">
                            <children>
-                              <Button fx:id="ruleSetResetRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reset rules" HBox.hgrow="ALWAYS" />
-                              <Button fx:id="ruleSetRandomizeRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Randomize rules" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="ruleSetResetRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reset" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="ruleSetRandomizeRulesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Randomize" HBox.hgrow="ALWAYS" />
                            </children>
                            <padding>
-                              <Insets bottom="12.0" left="16.0" right="16.0" />
+                              <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
                            </padding>
                         </HBox>
                         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                            <content>
-                              <VBox fx:id="ruleSetVBox" prefHeight="200.0" prefWidth="100.0" />
+                              <VBox fx:id="ruleSetVBox" prefHeight="100.0" />
                            </content>
                         </ScrollPane>
                      </children>
@@ -111,7 +124,7 @@
                         </GridPane>
                         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                            <content>
-                              <VBox fx:id="stateColorsVBox" prefHeight="200.0" prefWidth="100.0" />
+                              <VBox fx:id="stateColorsVBox" prefHeight="100.0" />
                            </content>
                         </ScrollPane>
                      </children>

@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.util.Vector2d;
+import cz.cvut.fel.hlusijak.util.Vector2i;
 
 import java.util.stream.IntStream;
 
@@ -17,10 +18,10 @@ import java.util.stream.IntStream;
 public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
     private static final double TILE_HEIGHT = Math.sqrt(3) / 2;
 
-    public TriangleGridGeometry(int width, int height) {
-        super(width, height);
-        Preconditions.checkArgument(width % 2 == 0, "The width must be even.");
-        Preconditions.checkArgument(height % 2 == 0, "The height must be even.");
+    public TriangleGridGeometry(Vector2i dimensions) {
+        super(dimensions);
+        Preconditions.checkArgument(dimensions.getX() % 2 == 0, "The width must be even.");
+        Preconditions.checkArgument(dimensions.getY() % 2 == 0, "The height must be even.");
     }
 
     @Override
@@ -30,6 +31,8 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getNeighbouringTileIndex(int tileIndex, int directionIndex) {
+        int width = getDimensions().getX();
+        int size = getSize();
         int y = tileIndex / width;
         boolean pointingUp = (tileIndex + y) % 2 == 0;
 
@@ -58,11 +61,14 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public Vector2d getVertexBoundingBox() {
-        return Vector2d.of(width / 2 + 0.5, height * TILE_HEIGHT);
+        Vector2i dimensions = getDimensions();
+
+        return Vector2d.of(dimensions.getX() / 2 + 0.5, dimensions.getY() * TILE_HEIGHT);
     }
 
     @Override
     public Vector2d[] getTileVertices(int tileIndex) {
+        int width = getDimensions().getX();
         int x = tileIndex % width;
         int y = tileIndex / width;
         boolean pointingUp = (x + y) % 2 == 0;

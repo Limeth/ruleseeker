@@ -2,23 +2,22 @@ package cz.cvut.fel.hlusijak.simulator.grid.geometry;
 
 import com.google.common.base.Preconditions;
 
+import cz.cvut.fel.hlusijak.util.Vector2i;
+
 /**
  * A grid of squares.
  */
 public abstract class AbstractRectangularGridGeometry implements GridGeometry {
-    protected final int width, height, size;
+    private final Vector2i dimensions;
 
-    public AbstractRectangularGridGeometry(int width, int height) {
-        Preconditions.checkArgument(width > 0, "The width must be positive.");
-        Preconditions.checkArgument(height > 0, "The height must be positive.");
+    public AbstractRectangularGridGeometry(Vector2i dimensions) {
+        Preconditions.checkArgument(dimensions.getX() > 0, "The width must be positive.");
+        Preconditions.checkArgument(dimensions.getY() > 0, "The height must be positive.");
 
-        this.width = width;
-        this.height = height;
-        this.size = width * height;
+        this.dimensions = dimensions;
     }
 
-    @Override
-    public int getSize() {
-        return size;
+    public Vector2i getDimensions() {
+        return dimensions;
     }
 }
