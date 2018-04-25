@@ -3,6 +3,8 @@ package cz.cvut.fel.hlusijak.util;
 import java.util.List;
 
 import cz.cvut.fel.hlusijak.simulator.Simulator;
+import javafx.geometry.Insets;
+import javafx.scene.layout.GridPane;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -58,5 +60,14 @@ public final class JFXUtil {
         simulator.getRuleSet().stateStream().forEach(comboBox.itemsProperty().get()::add);
 
         return comboBox;
+    }
+
+    public static void applyGridPaneStyle(GridPane gridPane, boolean applyGaps) {
+        if (applyGaps) {
+            gridPane.setHgap(16);
+            gridPane.setVgap(12);
+        }
+
+        gridPane.setPadding(new Insets(12, 16, 12, 16));
     }
 }

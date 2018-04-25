@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SettingsDialog extends Alert implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
@@ -206,6 +207,7 @@ public class SettingsDialog extends Alert implements Initializable {
                     GridPane root = new GridPane();
                     Slider hueOffsetSlider = new Slider(0, 1, method.getHueOffset());
 
+                    JFXUtil.applyGridPaneStyle(root, true);
                     root.addRow(0, new Label("Hue offset"), hueOffsetSlider);
 
                     hueOffsetSlider.setId("stateColorsHueOffset");
@@ -227,10 +229,20 @@ public class SettingsDialog extends Alert implements Initializable {
                 @Override
                 protected Node buildControls(CustomStateColoringMethod method) {
                     GridPane root = new GridPane();
+                    List<Paint> paints = method.getColors(simulator.getRuleSet());
+                    List<Color> colors = paints.stream().map(paint -> {
+                        if (paint instanceof Color) {
+                            return (Color) paint;
+                        } else {
+                            return Color.WHITE;
+                        }
+                    }).collect(Collectors.toList());
 
+                    JFXUtil.applyGridPaneStyle(root, true);
                     simulator.getRuleSet().stateStream().forEach(state -> {
                         ColorPicker colorPicker = new ColorPicker();
 
+                        colorPicker.setValue(colors.get(state));
                         root.addRow(state, colorPicker);
                         colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
                             method.setColor(state, newValue);
@@ -290,6 +302,7 @@ public class SettingsDialog extends Alert implements Initializable {
         int neighbourhoodSize = ruleSet.getNeighbourhoodSize();
         final GridPane grid = new GridPane();
 
+        JFXUtil.applyGridPaneStyle(grid, false);
         grid.add(new Label("Previous"), 0, 0);
         grid.add(new Label("Neighbours"), 1, 0, neighbourhoodSize, 1);
         grid.add(new Label("Next"), neighbourhoodSize + 1, 0);
