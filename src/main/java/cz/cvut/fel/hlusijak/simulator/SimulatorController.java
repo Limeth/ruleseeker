@@ -5,6 +5,7 @@ import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
+import cz.cvut.fel.hlusijak.util.JFXUtil;
 import cz.cvut.fel.hlusijak.util.TimeUtil;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 import cz.cvut.fel.hlusijak.util.Wrapper;
@@ -160,7 +161,7 @@ public class SimulatorController implements Initializable {
 
         intervalTextField.setText(Double.toString(this.intervalSeconds));
 
-        buildStateComboBox(editModeComboBox, simulator);
+        JFXUtil.buildStateComboBox(editModeComboBox, simulator);
         editModeComboBox.getSelectionModel().selectFirst();
 
         fillButton.setOnAction(event -> {
@@ -179,40 +180,6 @@ public class SimulatorController implements Initializable {
 
             updateViewPane(null);
         });
-    }
-
-    public static ComboBox<Integer> buildStateComboBox(ComboBox<Integer> comboBoxArg, Simulator simulator) {
-        final ComboBox<Integer> comboBox;
-
-        if (comboBoxArg == null) {
-            comboBox = new ComboBox<>();
-        } else {
-            comboBox = comboBoxArg;
-        }
-
-        List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
-
-        comboBox.setCellFactory(listView -> new ListCell<Integer>() {
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (item == null || empty) {
-                    return;
-                }
-
-                setText(Integer.toString(item));
-                setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
-            }
-        });
-
-        comboBox.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            comboBox.setBackground(new Background(new BackgroundFill(stateColors.get(newValue), null, null)));
-        }));
-
-        simulator.getRuleSet().stateStream().forEach(comboBox.itemsProperty().get()::add);
-
-        return comboBox;
     }
 
     private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {

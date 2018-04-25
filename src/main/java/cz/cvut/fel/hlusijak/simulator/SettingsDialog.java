@@ -2,6 +2,9 @@
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.AbstractRectangularGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
@@ -23,6 +27,7 @@ import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
+import cz.cvut.fel.hlusijak.util.JFXUtil;
 import cz.cvut.fel.hlusijak.util.Vector2i;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +37,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.util.StringConverter;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 
@@ -116,37 +122,68 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         gridHeightSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
 
         // Assign defaults
+        List<GridGeometryItem<?>> items = gridGeometryChoiceBox.getItems();
+
+        for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
+            GridGeometryItem<?> item = items.get(itemIndex);
+
+            if (item.value.isAssignableFrom(simulator.getGrid().getGeometry().getClass())) {
+                gridGeometryChoiceBox.getSelectionModel().select(itemIndex);
+                break;
+            }
+        }
+
+        Vector2i gridDimensions = simulator.getGrid().getGeometry().getDimensions();
+
+        gridWidthSpinner.getValueFactory().setValue(gridDimensions.getX());
+        gridHeightSpinner.getValueFactory().setValue(gridDimensions.getY());
+        updateGridSizeRequirements();
+
+        // Listeners
         gridGeometryChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateGridSizeRequirements();
         });
-        gridGeometryChoiceBox.getSelectionModel().selectFirst();
-
-        // Listeners
-        gridWidthSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                roundIntegerSpinnerValue(gridWidthSpinner);
-            }
+        JFXUtil.fixUnfocus(gridWidthSpinner);
+        JFXUtil.fixUnfocus(gridHeightSpinner);
+        gridWidthSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
+            roundIntegerSpinnerValue(gridWidthSpinner);
         });
-        gridHeightSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                roundIntegerSpinnerValue(gridHeightSpinner);
-            }
+        gridHeightSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
+            roundIntegerSpinnerValue(gridHeightSpinner);
         });
+        // gridHeightSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        //     if (!newValue) {
+        //         roundIntegerSpinnerValue(gridHeightSpinner);
+        //     }
+        // });
     }
 
     private void initializeRuleSetTab() {
         ruleSetTypeChoiceBox.getItems().addAll(
-                new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's neighbourhood generalized)", () -> {
+                new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's generalized)", () -> {
                     return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
                 }),
-                new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's neighbourhood generalized)", () -> {
+                new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's generalized)", () -> {
                     return new VertexSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
                 })
         );
         ruleSetCellStatesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, Integer.MAX_VALUE));
+        JFXUtil.fixUnfocus(ruleSetCellStatesSpinner);
 
         // Assign defaults
-        ruleSetTypeChoiceBox.getSelectionModel().selectFirst();
+        List<RuleSetItem<?>> items = ruleSetTypeChoiceBox.getItems();
+
+        for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
+            RuleSetItem<?> item = items.get(itemIndex);
+
+            if (item.value.isAssignableFrom(simulator.getRuleSet().getClass())) {
+                ruleSetTypeChoiceBox.getSelectionModel().select(itemIndex);
+                break;
+            }
+        }
+
+        ruleSetCellStatesSpinner.getValueFactory().setValue(simulator.getRuleSet().getNumberOfStates());
+        renderRuleView();
 
         // Listeners
         ruleSetTypeChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -155,6 +192,10 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
             }
         });
         ruleSetCellStatesSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue < 2) {
+                return;
+            }
+
             if (!oldValue.equals(newValue)) {
                 int[] rules = simulator.getRuleSet().getRules();
 
@@ -164,8 +205,17 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
                     }
                 }
 
+                simulator.getStateColoringMethod().clearCache();
                 updateRuleSet();
             }
+        });
+        ruleSetResetRulesButton.setOnAction(event -> {
+            Arrays.fill(simulator.getRuleSet().getRules(), 0);
+            renderRuleView();
+        });
+        ruleSetRandomizeRulesButton.setOnAction(event -> {
+            simulator.getRuleSet().randomizeRules(new Random());
+            renderRuleView();
         });
     }
 
@@ -209,7 +259,7 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
 
                 ruleSet.stateStream().forEach(nextStateComboBox.getItems()::add);
 
-                ComboBox<Integer> stateComboBox = SimulatorController.buildStateComboBox(null, simulator);
+                ComboBox<Integer> stateComboBox = JFXUtil.buildStateComboBox(null, simulator);
 
                 stateComboBox.getSelectionModel().select(rule.getNextState());
                 stateComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
@@ -226,8 +276,9 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
     private Node buildStateNode(int state) {
         final int POLYGON_SIZE = 20;
         Polygon polygon = new Polygon(0, 0, POLYGON_SIZE, 0, POLYGON_SIZE, POLYGON_SIZE, 0, POLYGON_SIZE);
+        List<Paint> colors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
 
-        polygon.setFill(Color.RED);
+        polygon.setFill(colors.get(state));
         polygon.setLayoutX(0);
         polygon.setLayoutY(0);
         polygon.setStrokeType(StrokeType.CENTERED);
@@ -239,9 +290,11 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
     private void roundIntegerSpinnerValue(Spinner<Integer> spinner) {
         int step = ((SpinnerValueFactory.IntegerSpinnerValueFactory) spinner.getValueFactory()).getAmountToStepBy();
         int prevValue = spinner.getValue();
+        int nextValue = step * (int) Math.ceil((double) prevValue / (double) step);
 
-        spinner.getValueFactory().setValue(0);
-        spinner.getValueFactory().setValue(step * (int) Math.ceil((double) prevValue / (double) step));
+        if (prevValue != nextValue) {
+            spinner.getValueFactory().setValue(nextValue);
+        }
     }
 
     private void updateSpinnerValueFactory(Spinner<Integer> spinner, int step) {
@@ -269,6 +322,7 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
             grid = new Grid(gridGeometry);
 
             this.simulator.setGrid(grid);
+            updateRuleSet();
         }
     }
 
