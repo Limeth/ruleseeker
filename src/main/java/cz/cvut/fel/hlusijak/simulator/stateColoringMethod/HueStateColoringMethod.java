@@ -1,6 +1,7 @@
 package cz.cvut.fel.hlusijak.simulator.stateColoringMethod;
 
 import java.util.List;
+import java.util.Random;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -12,6 +13,23 @@ import javafx.scene.paint.Color;
 
 public class HueStateColoringMethod implements StateColoringMethod {
     private List<Paint> cached;
+    private double hueOffset;
+
+    public HueStateColoringMethod(double hueOffset) {
+        this.hueOffset = hueOffset % 1.0;
+    }
+
+    public static HueStateColoringMethod random() {
+        return new HueStateColoringMethod(new Random().nextDouble());
+    }
+
+    public double getHueOffset() {
+        return hueOffset;
+    }
+
+    public void setHueOffset(double hueOffset) {
+        this.hueOffset = hueOffset % 1.0;
+    }
 
     @Override
     public List<Paint> getColors(RuleSet ruleSet) {
@@ -28,11 +46,10 @@ public class HueStateColoringMethod implements StateColoringMethod {
         int remainingStates = states - 1;
 
         for (int hueIndex = 0; hueIndex < remainingStates; hueIndex++) {
-            Color color = Color.hsb(360.0 * ((hueIndex / (double) remainingStates + ruleSet.getHueOffset()) % 1.0), 0.8, 1.0);
+            Color color = Color.hsb(360.0 * ((hueIndex / (double) remainingStates + hueOffset) % 1.0), 0.8, 1.0);
 
             builder.add(color);
         }
-
 
         return cached = builder.build();
     }
@@ -44,6 +61,6 @@ public class HueStateColoringMethod implements StateColoringMethod {
 
     @Override
     public HueStateColoringMethod copy() {
-        return new HueStateColoringMethod();
+        return new HueStateColoringMethod(hueOffset);
     }
 }

@@ -56,13 +56,10 @@ public class SimulatorController implements Initializable {
     private double intervalSeconds = 1.0;
 
     private CellShape[] cellShapes;
-    private double hueOffset = 0; // Update whenever the rule set changes
     private boolean mouseHeld = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        hueOffset = RuleSeeker.getInstance().getSimulator().getRuleSet().getHueOffset();
-
         initializeView();
         initializeToolbar();
         initializeSidePane();

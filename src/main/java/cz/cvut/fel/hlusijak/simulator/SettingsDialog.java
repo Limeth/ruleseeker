@@ -1,4 +1,35 @@
- package cz.cvut.fel.hlusijak.simulator;
+  package cz.cvut.fel.hlusijak.simulator;
+
+import com.google.common.base.Preconditions;
+import cz.cvut.fel.hlusijak.RuleSeeker;
+import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
+import cz.cvut.fel.hlusijak.util.JFXUtil;
+import cz.cvut.fel.hlusijak.util.Vector2i;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.StrokeType;
+import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -8,40 +39,8 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
-import com.google.common.base.Preconditions;
-
-import org.javatuples.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import cz.cvut.fel.hlusijak.RuleSeeker;
-import cz.cvut.fel.hlusijak.simulator.grid.Grid;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.AbstractRectangularGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
-import cz.cvut.fel.hlusijak.util.JFXUtil;
-import cz.cvut.fel.hlusijak.util.Vector2i;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.util.StringConverter;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.StrokeType;
-
-public class SettingsDialog<StateColoringMethod> extends Alert implements Initializable {
+public class SettingsDialog extends Alert implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
     private final Simulator simulator;
 
@@ -62,8 +61,8 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
     // }}}
 
     // State Colors tab {{{
-    @FXML private ChoiceBox<Item<? extends StateColoringMethod>> stateColorsMethodChoiceBox;
-    @FXML private VBox stateColorsVBox;
+    @FXML private ChoiceBox<ColoringMethodItem<?>> stateColorsMethodChoiceBox;
+    @FXML private HBox stateColorsPreviewHBox;
     @FXML private ScrollPane stateColorsScrollPane;
     // }}}
 
@@ -109,7 +108,7 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
 
         initializeGridTab();
         initializeRuleSetTab();
-        // initializeStateColorsTab();
+        initializeStateColorsTab();
     }
 
     private void initializeGridTab() {
@@ -122,17 +121,7 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         gridHeightSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
 
         // Assign defaults
-        List<GridGeometryItem<?>> items = gridGeometryChoiceBox.getItems();
-
-        for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
-            GridGeometryItem<?> item = items.get(itemIndex);
-
-            if (item.value.isAssignableFrom(simulator.getGrid().getGeometry().getClass())) {
-                gridGeometryChoiceBox.getSelectionModel().select(itemIndex);
-                break;
-            }
-        }
-
+        Item.selectByClass(gridGeometryChoiceBox, simulator.getGrid().getGeometry().getClass());
         Vector2i gridDimensions = simulator.getGrid().getGeometry().getDimensions();
 
         gridWidthSpinner.getValueFactory().setValue(gridDimensions.getX());
@@ -151,37 +140,22 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         gridHeightSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
             roundIntegerSpinnerValue(gridHeightSpinner);
         });
-        // gridHeightSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
-        //     if (!newValue) {
-        //         roundIntegerSpinnerValue(gridHeightSpinner);
-        //     }
-        // });
     }
 
     private void initializeRuleSetTab() {
         ruleSetTypeChoiceBox.getItems().addAll(
-                new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's generalized)", () -> {
-                    return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
-                }),
-                new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's generalized)", () -> {
-                    return new VertexSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
-                })
+            new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's generalized)", () -> {
+                return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
+            }),
+            new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's generalized)", () -> {
+                return new VertexSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
+            })
         );
         ruleSetCellStatesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, Integer.MAX_VALUE));
         JFXUtil.fixUnfocus(ruleSetCellStatesSpinner);
 
         // Assign defaults
-        List<RuleSetItem<?>> items = ruleSetTypeChoiceBox.getItems();
-
-        for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
-            RuleSetItem<?> item = items.get(itemIndex);
-
-            if (item.value.isAssignableFrom(simulator.getRuleSet().getClass())) {
-                ruleSetTypeChoiceBox.getSelectionModel().select(itemIndex);
-                break;
-            }
-        }
-
+        Item.selectByClass(ruleSetTypeChoiceBox, simulator.getRuleSet().getClass());
         ruleSetCellStatesSpinner.getValueFactory().setValue(simulator.getRuleSet().getNumberOfStates());
         renderRuleView();
 
@@ -216,6 +190,86 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         ruleSetRandomizeRulesButton.setOnAction(event -> {
             simulator.getRuleSet().randomizeRules(new Random());
             renderRuleView();
+        });
+    }
+
+    private void initializeStateColorsTab() {
+        stateColorsMethodChoiceBox.getItems().addAll(
+            new ColoringMethodItem<HueStateColoringMethod>(HueStateColoringMethod.class, "Evenly spaced hue values") {
+                @Override
+                protected HueStateColoringMethod construct(List<Paint> previousColors) {
+                    return HueStateColoringMethod.random();
+                }
+
+                @Override
+                protected Node buildControls(HueStateColoringMethod method) {
+                    GridPane root = new GridPane();
+                    Slider hueOffsetSlider = new Slider(0, 1, method.getHueOffset());
+
+                    root.addRow(0, new Label("Hue offset"), hueOffsetSlider);
+
+                    hueOffsetSlider.setId("stateColorsHueOffset");
+                    hueOffsetSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                        method.setHueOffset(newValue.doubleValue());
+                        method.clearCache();
+                        renderStateColorsPreview();
+                    });
+
+                    return root;
+                }
+            },
+            new ColoringMethodItem<CustomStateColoringMethod>(CustomStateColoringMethod.class, "Custom colors") {
+                @Override
+                protected CustomStateColoringMethod construct(List<Paint> previousColors) {
+                    return new CustomStateColoringMethod(previousColors);
+                }
+
+                @Override
+                protected Node buildControls(CustomStateColoringMethod method) {
+                    GridPane root = new GridPane();
+
+                    simulator.getRuleSet().stateStream().forEach(state -> {
+                        ColorPicker colorPicker = new ColorPicker();
+
+                        root.addRow(state, colorPicker);
+                        colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+                            method.setColor(state, newValue);
+                            renderStateColorsPreview();
+                        });
+                    });
+
+                    return root;
+                }
+            }
+        );
+
+        // Assign defaults
+        {
+            StateColoringMethod currentStateColoringMethod = simulator.getStateColoringMethod();
+            ColoringMethodItem<StateColoringMethod> item = /* topkek */ (ColoringMethodItem<StateColoringMethod>) (Object) Item.selectByClass(stateColorsMethodChoiceBox, currentStateColoringMethod.getClass());
+            Node root = item.buildControls(currentStateColoringMethod);
+
+            stateColorsScrollPane.setContent(root);
+            renderStateColorsPreview();
+        }
+
+        // Listeners
+        stateColorsMethodChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            List<Paint> previousColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
+            Pair<StateColoringMethod, Node> pair = (Pair<StateColoringMethod, Node>) newValue.constructAndBuildControls(previousColors);
+            StateColoringMethod stateColoringMethod = pair.getValue0();
+            Node root = pair.getValue1();
+
+            stateColorsScrollPane.setContent(root);
+            simulator.setStateColoringMethod(stateColoringMethod);
+            renderStateColorsPreview();
+        });
+    }
+
+    private void renderStateColorsPreview() {
+        stateColorsPreviewHBox.getChildren().clear();
+        simulator.getRuleSet().stateStream().forEach(state -> {
+            stateColorsPreviewHBox.getChildren().add(buildStateNode(state));
         });
     }
 
@@ -339,6 +393,21 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
         public String toString() {
             return displayName;
         }
+
+        private static <T> Item<Class<? extends T>> selectByClass(ChoiceBox<? extends Item<Class<? extends T>>> choiceBox, Class<? extends T> clazz) {
+            List<? extends Item<Class<? extends T>>> items = choiceBox.getItems();
+
+            for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
+                Item<Class<? extends T>> item = items.get(itemIndex);
+
+                if (item.value.isAssignableFrom(clazz)) {
+                    choiceBox.getSelectionModel().select(itemIndex);
+                    return item;
+                }
+            }
+
+            throw new IllegalStateException("No item found for class " + clazz);
+        }
     }
 
     private static class GridGeometryItem<T extends GridGeometry> extends Item<Class<T>> {
@@ -362,6 +431,21 @@ public class SettingsDialog<StateColoringMethod> extends Alert implements Initia
             super(value, displayName);
 
             this.constructor = constructor;
+        }
+    }
+
+    private static abstract class ColoringMethodItem<T extends StateColoringMethod> extends Item<Class<T>> {
+        private ColoringMethodItem(Class<T> value, String displayName) {
+            super(value, displayName);
+        }
+
+        protected abstract T construct(List<Paint> previousColors);
+        protected abstract Node buildControls(T method);
+
+        private Pair<T, Node> constructAndBuildControls(List<Paint> previousColors) {
+            T stateColoringMethod = construct(previousColors);
+
+            return Pair.with(stateColoringMethod, buildControls(stateColoringMethod));
         }
     }
 }

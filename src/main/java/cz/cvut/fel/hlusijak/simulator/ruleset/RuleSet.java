@@ -53,14 +53,5 @@ public interface RuleSet {
         return IntStream.range(0, getNumberOfStates());
     }
 
-    /**
-     * This method is very expensive. Make sure to cache the result.
-     *
-     * @return Creates a unique hue offset in the <0; 1) range for the current rules.
-     */
-    default double getHueOffset() {
-        return new Random(Arrays.hashCode(getRules())).nextDouble();
-    }
-
     RuleSet copy();
 }

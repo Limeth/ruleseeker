@@ -118,6 +118,11 @@
                               <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
                            </padding>
                         </GridPane>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" pannable="true" vbarPolicy="NEVER">
+                           <content>
+                              <HBox fx:id="stateColorsPreviewHBox" alignment="CENTER" />
+                           </content>
+                        </ScrollPane>
                         <ScrollPane fx:id="stateColorsScrollPane" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
