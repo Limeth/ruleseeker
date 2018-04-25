@@ -31,7 +31,7 @@ public class SimulatorApplication extends Application {
 
     private void initSimulator() {
         Random rng = new Random();
-        GridGeometry gridGeometry = new TriangleGridGeometry(Vector2i.of(128, 64));
+        GridGeometry gridGeometry = new TriangleGridGeometry(Vector2i.of(50, 50));
         RuleSet ruleSet = new VertexSumRuleSet(gridGeometry, 2);
 
         ruleSet.randomizeRules(rng);

@@ -16,6 +16,7 @@ import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
 import cz.cvut.fel.hlusijak.util.JFXUtil;
 import cz.cvut.fel.hlusijak.util.Vector2i;
+import cz.cvut.fel.hlusijak.util.Wrapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -27,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +76,7 @@ public class SettingsDialog extends Alert implements Initializable {
         this.simulator = simulator;
     }
 
-    public static SettingsDialog open() {
+    public static Simulator open() {
         Simulator previousSimulator = RuleSeeker.getInstance().getSimulator();
 
         Preconditions.checkNotNull(previousSimulator, "The simulator must be set.");
@@ -91,14 +93,20 @@ public class SettingsDialog extends Alert implements Initializable {
             LOGGER.error("An exception occurred while opening the settings dialog.", e);
         }
 
+        Wrapper<Simulator> nextSimulator = new Wrapper(null);
+
         dialog.setResizable(true);
         dialog.showAndWait().ifPresent(buttonType -> {
-            if (buttonType == ButtonType.FINISH) {
-                RuleSeeker.getInstance().setSimulator(simulator);
+            if (buttonType.getButtonData().equals(ButtonData.FINISH)) {
+                dialog.updateSimulator();
+
+                nextSimulator.value = dialog.simulator;
+            } else {
+                nextSimulator.value = previousSimulator;
             }
         });
 
-        return dialog;
+        return nextSimulator.value;
     }
 
     @Override

@@ -83,13 +83,15 @@ public class SimulatorController implements Initializable {
 
     private void initializeToolbar() {
         settingsButton.setOnAction(event -> {
-            SettingsDialog.open();
+            Simulator simulator = SettingsDialog.open();
+
+            RuleSeeker.getInstance().setSimulator(simulator);
+            initializeEditModeComboBox();
+            updateViewPane(null);
         });
     }
 
     private void initializeSidePane() {
-        Simulator simulator = RuleSeeker.getInstance().getSimulator();
-
         resumeButton.setOnAction(event -> {
             synchronized (simulationLock) {
                 resumed = true;
@@ -98,6 +100,8 @@ public class SimulatorController implements Initializable {
                     return;
                 }
 
+                Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
                 resumeTaskRunning = true;
                 settingsButton.setDisable(true);
                 simulator.runAsync(this::onIterationComplete);
@@ -105,6 +109,8 @@ public class SimulatorController implements Initializable {
         });
 
         stepButton.setOnAction(event -> {
+            Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
             simulator.nextIteration().thenAcceptAsync(iterationResult ->
                 updateViewPane(iterationResult.getNextGrid()), FutureUtil.getJFXExecutor());
         });
@@ -157,11 +163,11 @@ public class SimulatorController implements Initializable {
         });
 
         intervalTextField.setText(Double.toString(this.intervalSeconds));
-
-        JFXUtil.buildStateComboBox(editModeComboBox, simulator);
-        editModeComboBox.getSelectionModel().selectFirst();
+        initializeEditModeComboBox();
 
         fillButton.setOnAction(event -> {
+            Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
             synchronized (simulator) {
                 Grid grid = simulator.getGrid();
 
@@ -171,12 +177,21 @@ public class SimulatorController implements Initializable {
         });
 
         randomizeButton.setOnAction(event -> {
+            Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
             synchronized (simulator) {
                 simulator.getGrid().randomizeTileStates(new Random(), simulator.getRuleSet());
             }
 
             updateViewPane(null);
         });
+    }
+
+    private void initializeEditModeComboBox() {
+        Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
+        JFXUtil.buildStateComboBox(editModeComboBox, simulator);
+        editModeComboBox.getSelectionModel().selectFirst();
     }
 
     private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {

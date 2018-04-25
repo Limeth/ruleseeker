@@ -13,8 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-
-<VBox xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.cvut.fel.hlusijak.simulator.SimulatorController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.cvut.fel.hlusijak.simulator.SimulatorController">
    <children>
       <ToolBar VBox.vgrow="NEVER">
         <items>
@@ -24,9 +23,9 @@
             <Button fx:id="settingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Settings" />
         </items>
       </ToolBar>
-      <SplitPane dividerPositions="0.6" prefHeight="480.0" prefWidth="640.0">
+      <SplitPane dividerPositions="0.6" prefHeight="480.0" prefWidth="640.0" VBox.vgrow="ALWAYS">
          <items>
-            <Pane fx:id="viewPane" />
+            <Pane fx:id="viewPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
             <VBox spacing="24.0">
                <children>
                   <HBox alignment="TOP_CENTER" spacing="12.0">
