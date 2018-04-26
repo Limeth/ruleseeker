@@ -3,7 +3,6 @@ package cz.cvut.fel.hlusijak.simulator;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
 import cz.cvut.fel.hlusijak.util.JFXUtil;
 import cz.cvut.fel.hlusijak.util.TimeUtil;
@@ -12,20 +11,17 @@ import cz.cvut.fel.hlusijak.util.Wrapper;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import org.javatuples.Pair;
 
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -188,9 +184,7 @@ public class SimulatorController implements Initializable {
     }
 
     private void initializeEditModeComboBox() {
-        Simulator simulator = RuleSeeker.getInstance().getSimulator();
-
-        JFXUtil.buildStateComboBox(editModeComboBox, simulator);
+        JFXUtil.buildStateComboBox(editModeComboBox, () -> RuleSeeker.getInstance().getSimulator());
         editModeComboBox.getSelectionModel().selectFirst();
     }
 

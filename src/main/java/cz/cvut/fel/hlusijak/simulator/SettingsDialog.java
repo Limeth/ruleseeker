@@ -381,7 +381,7 @@ public class SettingsDialog extends Alert implements Initializable {
 
                 ruleSet.stateStream().forEach(nextStateComboBox.getItems()::add);
 
-                ComboBox<Integer> stateComboBox = JFXUtil.buildStateComboBox(null, simulator);
+                ComboBox<Integer> stateComboBox = JFXUtil.buildStateComboBox(null, () -> simulator);
 
                 stateComboBox.getSelectionModel().select(rule.getNextState());
                 stateComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {

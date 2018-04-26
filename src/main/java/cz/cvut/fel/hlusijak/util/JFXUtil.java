@@ -1,27 +1,25 @@
 package cz.cvut.fel.hlusijak.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import cz.cvut.fel.hlusijak.simulator.Simulator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import cz.cvut.fel.hlusijak.simulator.Simulator;
-import javafx.geometry.Insets;
-import javafx.scene.layout.GridPane;
-import javafx.beans.InvalidationListener;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.ChangeListener;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import java.util.function.Supplier;
 
 public final class JFXUtil {
     private JFXUtil() {}
@@ -48,7 +46,7 @@ public final class JFXUtil {
         observableValue.addListener(listener);
     }
 
-    public static ComboBox<Integer> buildStateComboBox(ComboBox<Integer> comboBoxArg, Simulator simulator) {
+    public static ComboBox<Integer> buildStateComboBox(ComboBox<Integer> comboBoxArg, Supplier<Simulator> simulatorSupplier) {
         final ComboBox<Integer> comboBox;
 
         if (comboBoxArg == null) {
@@ -59,26 +57,29 @@ public final class JFXUtil {
 
         comboBox.getSelectionModel().clearSelection();
         comboBox.getItems().clear();
-        // comboBox.setCellFactory(listView -> new ListCell<Integer>() {
-        //     @Override
-        //     protected void updateItem(Integer item, boolean empty) {
-        //         super.updateItem(item, empty);
+        comboBox.setCellFactory(null);
+        comboBox.setCellFactory(listView -> new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
 
-        //         if (item == null || empty) {
-        //             return;
-        //         }
+                if (item == null || empty) {
+                    return;
+                }
 
-        //         List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
+                Simulator simulator = simulatorSupplier.get();
+                List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
 
-        //         setText(Integer.toString(item));
-        //         setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
-        //     }
-        // });
+                setText(Integer.toString(item));
+                setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
+            }
+        });
 
         ChangeListener<Integer> listener = (observable, oldValue, newValue) -> {
             Paint paint;
 
             if (newValue != null) {
+                Simulator simulator = simulatorSupplier.get();
                 List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
                 paint = stateColors.get(newValue);
             } else {
@@ -90,7 +91,8 @@ public final class JFXUtil {
 
         clearRegisteredListeners(comboBox.valueProperty());
         addAndRegisterListener(comboBox.valueProperty(), listener);
-        comboBox.valueProperty().addListener(listener);
+
+        Simulator simulator = simulatorSupplier.get();
 
         simulator.getRuleSet().stateStream().forEach(comboBox.itemsProperty().get()::add);
 
