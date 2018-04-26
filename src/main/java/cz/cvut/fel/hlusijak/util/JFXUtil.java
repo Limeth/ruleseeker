@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -36,13 +37,8 @@ public final class JFXUtil {
     private static final Map<ObservableValue, List<ChangeListener>> LISTENERS = Maps.newIdentityHashMap();
 
     public static void clearRegisteredListeners(ObservableValue<?> observableValue) {
-        List<ChangeListener> listeners = LISTENERS.remove(observableValue);
-
-        if (listeners != null) {
-            for (ChangeListener listener : listeners) {
-                observableValue.removeListener(listener);
-            }
-        }
+        Optional.ofNullable(LISTENERS.remove(observableValue))
+            .ifPresent(listeners -> listeners.forEach(observableValue::removeListener));
     }
 
     public static <T> void addAndRegisterListener(ObservableValue<T> observableValue, ChangeListener<? super T> listener) {
@@ -63,21 +59,21 @@ public final class JFXUtil {
 
         comboBox.getSelectionModel().clearSelection();
         comboBox.getItems().clear();
-        comboBox.setCellFactory(listView -> new ListCell<Integer>() {
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
+        // comboBox.setCellFactory(listView -> new ListCell<Integer>() {
+        //     @Override
+        //     protected void updateItem(Integer item, boolean empty) {
+        //         super.updateItem(item, empty);
 
-                if (item == null || empty) {
-                    return;
-                }
+        //         if (item == null || empty) {
+        //             return;
+        //         }
 
-                List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
+        //         List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
 
-                setText(Integer.toString(item));
-                setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
-            }
-        });
+        //         setText(Integer.toString(item));
+        //         setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
+        //     }
+        // });
 
         ChangeListener<Integer> listener = (observable, oldValue, newValue) -> {
             Paint paint;

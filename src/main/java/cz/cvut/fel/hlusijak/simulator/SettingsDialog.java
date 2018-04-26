@@ -50,12 +50,14 @@ public class SettingsDialog extends Alert implements Initializable {
     @FXML private TabPane tabPane;
 
     // Grid tab {{{
+    @FXML private Tab gridTab;
     @FXML private ChoiceBox<GridGeometryItem<?>> gridGeometryChoiceBox;
     @FXML private Spinner<Integer> gridWidthSpinner;
     @FXML private Spinner<Integer> gridHeightSpinner;
     // }}}
 
     // Rule Set tab {{{
+    @FXML private Tab ruleSetTab;
     @FXML private ChoiceBox<RuleSetItem<?>> ruleSetTypeChoiceBox;
     @FXML private Spinner<Integer> ruleSetCellStatesSpinner;
     @FXML private Button ruleSetResetRulesButton;
@@ -64,10 +66,14 @@ public class SettingsDialog extends Alert implements Initializable {
     // }}}
 
     // State Colors tab {{{
+    @FXML private Tab stateColorsTab;
     @FXML private ChoiceBox<ColoringMethodItem<?>> stateColorsMethodChoiceBox;
     @FXML private HBox stateColorsPreviewHBox;
     @FXML private ScrollPane stateColorsScrollPane;
     // }}}
+
+    private boolean ruleViewInvalidated = true;
+    private boolean stateColorsInvalidated = true;
 
     private SettingsDialog(Simulator simulator) {
         super(AlertType.NONE);
@@ -113,6 +119,16 @@ public class SettingsDialog extends Alert implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateSimulator();
+
+            if ((newValue == ruleSetTab) && ruleViewInvalidated) {
+                ruleViewInvalidated = false;
+
+                renderRuleView();
+            } else if ((newValue == stateColorsTab) && stateColorsInvalidated) {
+                stateColorsInvalidated = false;
+
+                renderStateColors();
+            }
         });
 
         initializeGridTab();
@@ -190,6 +206,8 @@ public class SettingsDialog extends Alert implements Initializable {
 
                 simulator.getStateColoringMethod().clearCache();
                 updateRuleSet();
+
+                stateColorsInvalidated = true;
             }
         });
         ruleSetResetRulesButton.setOnAction(event -> {
@@ -223,6 +241,8 @@ public class SettingsDialog extends Alert implements Initializable {
                         method.setHueOffset(newValue.doubleValue());
                         method.clearCache();
                         renderStateColorsPreview();
+
+                        ruleViewInvalidated = true;
                     });
 
                     return root;
@@ -255,6 +275,8 @@ public class SettingsDialog extends Alert implements Initializable {
                         colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
                             method.setColor(state, newValue);
                             renderStateColorsPreview();
+
+                            ruleViewInvalidated = true;
                         });
                     });
 
@@ -264,26 +286,27 @@ public class SettingsDialog extends Alert implements Initializable {
         );
 
         // Assign defaults
-        {
-            StateColoringMethod currentStateColoringMethod = simulator.getStateColoringMethod();
-            ColoringMethodItem<StateColoringMethod> item = /* topkek */ (ColoringMethodItem<StateColoringMethod>) (Object) Item.selectByClass(stateColorsMethodChoiceBox, currentStateColoringMethod.getClass());
-            Node root = item.buildControls(currentStateColoringMethod);
-
-            stateColorsScrollPane.setContent(root);
-            renderStateColorsPreview();
-        }
+        renderStateColors();
 
         // Listeners
         stateColorsMethodChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             List<Paint> previousColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
-            Pair<StateColoringMethod, Node> pair = (Pair<StateColoringMethod, Node>) newValue.constructAndBuildControls(previousColors);
-            StateColoringMethod stateColoringMethod = pair.getValue0();
-            Node root = pair.getValue1();
+            StateColoringMethod stateColoringMethod = newValue.construct(previousColors);
 
-            stateColorsScrollPane.setContent(root);
             simulator.setStateColoringMethod(stateColoringMethod);
-            renderStateColorsPreview();
+            renderStateColors();
+
+            ruleViewInvalidated = true;
         });
+    }
+
+    private void renderStateColors() {
+        StateColoringMethod currentStateColoringMethod = simulator.getStateColoringMethod();
+        ColoringMethodItem<StateColoringMethod> item = /* topkek */ (ColoringMethodItem<StateColoringMethod>) (Object) Item.selectByClass(stateColorsMethodChoiceBox, currentStateColoringMethod.getClass());
+        Node root = item.buildControls(currentStateColoringMethod);
+
+        stateColorsScrollPane.setContent(root);
+        renderStateColorsPreview();
     }
 
     private void renderStateColorsPreview() {

@@ -22,7 +22,7 @@
    <content>
       <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" tabClosingPolicy="UNAVAILABLE">
          <tabs>
-            <Tab text="Grid">
+            <Tab fx:id="gridTab" text="Grid">
                <content>
                   <GridPane hgap="16.0" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" vgap="12.0">
                     <columnConstraints>
@@ -50,7 +50,7 @@
                   </GridPane>
                </content>
             </Tab>
-            <Tab text="Rule Set">
+            <Tab fx:id="ruleSetTab" text="Rule Set">
                <content>
                   <VBox>
                      <children>
@@ -98,7 +98,7 @@
                   </VBox>
                </content>
             </Tab>
-            <Tab text="State Colors">
+            <Tab fx:id="stateColorsTab" text="State Colors">
                <content>
                   <VBox>
                      <children>
