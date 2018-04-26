@@ -42,6 +42,7 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SettingsDialog extends Alert implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
@@ -257,7 +258,7 @@ public class SettingsDialog extends Alert implements Initializable {
                 @Override
                 protected Node buildControls(CustomStateColoringMethod method) {
                     GridPane root = new GridPane();
-                    List<Paint> paints = method.getColors(simulator.getRuleSet());
+                    List<Paint> paints = method.getColors();
                     List<Color> colors = paints.stream().map(paint -> {
                         if (paint instanceof Color) {
                             return (Color) paint;
@@ -267,18 +268,41 @@ public class SettingsDialog extends Alert implements Initializable {
                     }).collect(Collectors.toList());
 
                     JFXUtil.applyGridPaneStyle(root, true);
-                    simulator.getRuleSet().stateStream().forEach(state -> {
+                    IntStream.range(0, colors.size()).forEach(colorIndex -> {
                         ColorPicker colorPicker = new ColorPicker();
 
-                        colorPicker.setValue(colors.get(state));
-                        root.addRow(state, colorPicker);
+                        colorPicker.setValue(colors.get(colorIndex));
+                        root.add(colorPicker, 0, colorIndex, 2, 1);
                         colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-                            method.setColor(state, newValue);
+                            method.setColor(colorIndex, newValue);
                             renderStateColorsPreview();
 
                             ruleViewInvalidated = true;
                         });
                     });
+
+                    Button addButton = new Button("Add");
+                    Button removeButton = new Button("Remove");
+
+                    addButton.setOnAction(event -> {
+                        method.addColor(Color.WHITE);
+                        renderStateColors();
+
+                        ruleViewInvalidated = true;
+                    });
+
+                    if (method.size() <= 2) {
+                        removeButton.setDisable(true);
+                    } else {
+                        removeButton.setOnAction(event -> {
+                            method.removeLastColor();
+                            renderStateColors();
+
+                            ruleViewInvalidated = true;
+                        });
+                    }
+
+                    root.addRow(colors.size(), addButton, removeButton);
 
                     return root;
                 }

@@ -33,7 +33,6 @@
                       <RowConstraints vgrow="SOMETIMES" />
                       <RowConstraints vgrow="SOMETIMES" />
                       <RowConstraints vgrow="SOMETIMES" />
-                        <RowConstraints vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <Label text="Geometry" />
@@ -42,7 +41,6 @@
                         <Spinner fx:id="gridWidthSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Height" GridPane.rowIndex="2" />
                         <Spinner fx:id="gridHeightSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      </children>
                      <padding>
                         <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
@@ -62,14 +60,12 @@
                            <rowConstraints>
                               <RowConstraints vgrow="SOMETIMES" />
                               <RowConstraints vgrow="SOMETIMES" />
-                              <RowConstraints vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
                               <Label text="Rule set type" />
                               <ChoiceBox fx:id="ruleSetTypeChoiceBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                               <Label text="Cell states" GridPane.rowIndex="1" />
                               <Spinner fx:id="ruleSetCellStatesSpinner" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Label text="Press Enter to confirm the integer values" textFill="#00000080" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                            </children>
                            <padding>
                               <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />

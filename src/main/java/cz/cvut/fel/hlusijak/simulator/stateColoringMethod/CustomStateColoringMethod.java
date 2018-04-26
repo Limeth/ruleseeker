@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.stateColoringMethod;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -44,12 +45,32 @@ public class CustomStateColoringMethod implements StateColoringMethod {
         return builder.build();
     }
 
+    public int size() {
+        return colors.size();
+    }
+
+    public List<Paint> getColors() {
+        return Lists.newArrayList(colors);
+    }
+
     public void setColors(List<Paint> colors) {
         this.colors = Lists.newArrayList(colors);
     }
 
     public Paint setColor(int state, Paint color) {
         return colors.set(state, color);
+    }
+
+    public void addColor(Paint color) {
+        colors.add(color);
+    }
+
+    public Optional<Paint> removeLastColor() {
+        if (colors.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(colors.remove(colors.size() - 1));
+        }
     }
 
     @Override
