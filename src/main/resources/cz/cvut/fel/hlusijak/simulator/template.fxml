@@ -13,9 +13,9 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.cvut.fel.hlusijak.simulator.SimulatorController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ToolBar VBox.vgrow="NEVER">
+      <ToolBar fx:id="toolbar" VBox.vgrow="NEVER">
         <items>
           <Button fx:id="loadButton" mnemonicParsing="false" text="Load" />
             <Button fx:id="saveButton" mnemonicParsing="false" text="Save" />

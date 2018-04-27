@@ -5,6 +5,7 @@ import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
 import cz.cvut.fel.hlusijak.util.JFXUtil;
+import cz.cvut.fel.hlusijak.util.SerializationUtil;
 import cz.cvut.fel.hlusijak.util.TimeUtil;
 import cz.cvut.fel.hlusijak.util.Vector2d;
 import cz.cvut.fel.hlusijak.util.Wrapper;
@@ -15,21 +16,42 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
-import org.javatuples.Pair;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 
+import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 public class SimulatorController implements Initializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorController.class);
+
+    private final Stage stage;
     @FXML private Pane viewPane;
 
     // ToolBar
+    @FXML private ToolBar toolbar;
     @FXML private Button loadButton;
     @FXML private Button saveButton;
     @FXML private Button settingsButton;
@@ -53,6 +75,10 @@ public class SimulatorController implements Initializable {
 
     private CellShape[] cellShapes;
     private boolean mouseHeld = false;
+
+    public SimulatorController(Stage stage) {
+        this.stage = stage;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -78,6 +104,77 @@ public class SimulatorController implements Initializable {
     }
 
     private void initializeToolbar() {
+        loadButton.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+
+            fileChooser.setTitle("Open Simulation File");
+            fileChooser.getExtensionFilters().addAll(
+                new ExtensionFilter("RuleSeeker Simulation File", "*.rssim"),
+                new ExtensionFilter("All Files", "*.*")
+            );
+
+            Optional<Path> pathOptional = Optional.ofNullable(fileChooser.showOpenDialog(stage)).map(File::toPath);
+
+            if (!pathOptional.isPresent()) {
+                return;
+            }
+
+            Path path = pathOptional.get();
+            Kryo kryo = SerializationUtil.constructKryo();
+            Input input = null;
+            Simulator simulator;
+
+            try {
+                input = new Input(Files.newInputStream(path));
+                simulator = kryo.readObject(input, Simulator.class);
+            } catch (IOException e) {
+                LOGGER.error("An error occurred while loading the simulation.", e);
+                return;
+            } finally {
+                if (input != null) {
+                    input.close();
+                }
+            }
+
+            RuleSeeker.getInstance().setSimulator(simulator);
+            updateViewPane(null);
+            initializeEditModeComboBox();
+        });
+        saveButton.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+
+            fileChooser.setTitle("Save Simulation File");
+            fileChooser.getExtensionFilters().addAll(
+                new ExtensionFilter("RuleSeeker Simulation File", "*.rssim"),
+                new ExtensionFilter("All Files", "*.*")
+            );
+
+            Optional<Path> pathOptional = Optional.ofNullable(fileChooser.showSaveDialog(stage)).map(File::toPath);
+
+            if (!pathOptional.isPresent()) {
+                return;
+            }
+
+            Path path = pathOptional.get();
+
+            if (!SerializationUtil.getExtension(path).isPresent()) {
+                path = path.resolveSibling(path.getFileName().toString() + ".rssim");
+            }
+
+            Kryo kryo = SerializationUtil.constructKryo();
+            Output output = null;
+
+            try {
+                output = new Output(Files.newOutputStream(path));
+                kryo.writeObject(output, RuleSeeker.getInstance().getSimulator());
+            } catch (IOException e) {
+                LOGGER.error("An error occurred while saving the simulation.", e);
+            } finally {
+                if (output != null) {
+                    output.close();
+                }
+            }
+        });
         settingsButton.setOnAction(event -> {
             Simulator simulator = SettingsDialog.open();
 
@@ -99,7 +196,7 @@ public class SimulatorController implements Initializable {
                 Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
                 resumeTaskRunning = true;
-                settingsButton.setDisable(true);
+                toolbar.setDisable(true);
                 simulator.runAsync(this::onIterationComplete);
             }
         });
@@ -224,7 +321,7 @@ public class SimulatorController implements Initializable {
                     this.resumeTaskRunning = cont && this.resumed;
 
                     if (!this.resumeTaskRunning) {
-                        this.settingsButton.setDisable(false);
+                        this.toolbar.setDisable(false);
                     }
 
                     return this.resumeTaskRunning;

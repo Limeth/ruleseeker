@@ -14,6 +14,10 @@ public class VertexSumRuleSet extends SumRuleSet<GridGeometry> {
         super(gridGeometry, states, null);
     }
 
+    private VertexSumRuleSet() {
+        // Required by Kryo
+    }
+
     @Override
     public int getNeighbourhoodSize() {
         return gridGeometry.getVertexNeighbourhoodSize();

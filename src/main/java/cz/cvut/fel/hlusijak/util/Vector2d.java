@@ -18,6 +18,11 @@ public class Vector2d {
         this(d, d);
     }
 
+    private Vector2d() {
+        this(0, 0);
+        // Required by Kryo
+    }
+
     public static Vector2d of(double x, double y) {
         return new Vector2d(x, y);
     }

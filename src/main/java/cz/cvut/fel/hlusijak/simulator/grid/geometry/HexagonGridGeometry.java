@@ -28,6 +28,10 @@ public class HexagonGridGeometry extends AbstractRectangularGridGeometry {
         Preconditions.checkArgument(dimensions.getY() % 2 == 0, "The height must be even.");
     }
 
+    private HexagonGridGeometry() {
+        // Required by Kryo
+    }
+
     @Override
     public int getEdgeNeighbourhoodSize() {
         return 6;

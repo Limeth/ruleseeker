@@ -15,14 +15,29 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SimulatorApplication extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorApplication.class);
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         initSimulator();
 
         Parent root = FXMLLoader.load(getClass().getResource("template.fxml"));
+        SimulatorController controller = new SimulatorController(primaryStage);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(SettingsDialog.class.getResource("template.fxml"));
+            loader.setController(controller);
+            root = loader.load();
+        } catch (IOException e) {
+            LOGGER.error("An exception occurred while opening the settings dialog.", e);
+        }
 
         primaryStage.setTitle(RuleSeeker.getInstance().getProjectArtifactId());
         primaryStage.setScene(new Scene(root));

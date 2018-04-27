@@ -38,6 +38,13 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
         this(gridGeometry, states, null);
     }
 
+    protected SumRuleSet() {
+        // Required by Kryo
+        this.gridGeometry = null;
+        this.states = 0;
+        this.neighbouringStateCombinations = 0;
+    }
+
     public abstract int getNeighbourhoodSize();
     public abstract IntStream neighbourhoodTileIndicesStream(int tileIndex);
 

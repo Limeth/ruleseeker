@@ -14,6 +14,10 @@ public class EdgeSumRuleSet extends SumRuleSet<GridGeometry> {
         super(gridGeometry, states, null);
     }
 
+    private EdgeSumRuleSet() {
+        // Required by Kryo
+    }
+
     @Override
     public int getNeighbourhoodSize() {
         return this.gridGeometry.getEdgeNeighbourhoodSize();

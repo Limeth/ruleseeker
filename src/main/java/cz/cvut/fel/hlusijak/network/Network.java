@@ -3,6 +3,8 @@ package cz.cvut.fel.hlusijak.network;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 
+import cz.cvut.fel.hlusijak.util.SerializationUtil;
+
 public final class Network {
     public static final int SERVER_PORT_DEFAULT = 12993;
     public static final int CONNECTION_TIMEOUT_MILLIS = 5000;
@@ -12,9 +14,6 @@ public final class Network {
     private Network() {}
 
     public static void register(EndPoint endPoint) {
-        Kryo kryo = endPoint.getKryo();
-
-        kryo.register(ConnectionRequestPacket.class);
-        kryo.register(ConnectionResultPacket.class);
+        SerializationUtil.register(endPoint.getKryo());
     }
 }

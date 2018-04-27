@@ -1,5 +1,7 @@
 package cz.cvut.fel.hlusijak.simulator.stateColoringMethod;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -17,6 +19,10 @@ public class HueStateColoringMethod implements StateColoringMethod {
 
     public HueStateColoringMethod(double hueOffset) {
         this.hueOffset = hueOffset % 1.0;
+    }
+
+    private HueStateColoringMethod() {
+        // Required by Kryo
     }
 
     public static HueStateColoringMethod random() {
@@ -39,19 +45,19 @@ public class HueStateColoringMethod implements StateColoringMethod {
             return cached;
         }
 
-        Builder<Paint> builder = ImmutableList.builderWithExpectedSize(states);
+        cached = new ArrayList<>(states);
 
-        builder.add(Color.WHITE);
+        cached.add(Color.WHITE);
 
         int remainingStates = states - 1;
 
         for (int hueIndex = 0; hueIndex < remainingStates; hueIndex++) {
             Color color = Color.hsb(360.0 * ((hueIndex / (double) remainingStates + hueOffset) % 1.0), 0.8, 1.0);
 
-            builder.add(color);
+            cached.add(color);
         }
 
-        return cached = builder.build();
+        return Collections.unmodifiableList(cached);
     }
 
     @Override

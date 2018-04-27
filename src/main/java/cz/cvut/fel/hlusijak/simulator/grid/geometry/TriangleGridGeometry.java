@@ -24,6 +24,10 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
         Preconditions.checkArgument(dimensions.getY() % 2 == 0, "The height must be even.");
     }
 
+    private TriangleGridGeometry() {
+        // Required by Kryo
+    }
+
     @Override
     public int getEdgeNeighbourhoodSize() {
         return 3;

@@ -27,6 +27,10 @@ public class Simulator {
         this.cellsPerTask = cellsPerTask;
     }
 
+    private Simulator() {
+        // Required by Kryo
+    }
+
     private CompletableFuture<Integer> recursiveFuture(Function<IterationResult, CompletableFuture<Boolean>> onIterationComplete) {
         return nextIterationAsync().thenCompose(onIterationComplete).thenCompose(cont -> {
             if (cont) {

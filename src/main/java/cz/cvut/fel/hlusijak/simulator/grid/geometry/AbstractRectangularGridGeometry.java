@@ -17,6 +17,10 @@ public abstract class AbstractRectangularGridGeometry implements GridGeometry {
         this.dimensions = dimensions;
     }
 
+    protected AbstractRectangularGridGeometry() {
+        this.dimensions = null;
+    }
+
     public Vector2i getDimensions() {
         return dimensions;
     }

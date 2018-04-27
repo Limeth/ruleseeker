@@ -19,6 +19,10 @@ public class SquareGridGeometry extends AbstractRectangularGridGeometry {
         super(dimensions);
     }
 
+    private SquareGridGeometry() {
+        // Required by Kryo
+    }
+
     @Override
     public int getEdgeNeighbourhoodSize() {
         return 4;

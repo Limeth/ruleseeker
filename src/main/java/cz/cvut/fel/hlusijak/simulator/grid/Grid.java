@@ -18,6 +18,12 @@ public class Grid {
         this.states = new int[geometry.getSize()];
     }
 
+    private Grid() {
+        // Required by Kryo
+        this.geometry = null;
+        this.states = null;
+    }
+
     public GridGeometry getGeometry() {
         return geometry;
     }
