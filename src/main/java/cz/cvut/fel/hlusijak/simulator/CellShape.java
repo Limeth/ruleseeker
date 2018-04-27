@@ -8,14 +8,12 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 
 public class CellShape extends Polygon {
-    private final Simulator simulator;
     private final SimulatorController simulatorController;
     private final int index;
 
     public CellShape(SimulatorController simulatorController, int index, int state, Vector2d... vertices) {
         super();
 
-        this.simulator = RuleSeeker.getInstance().getSimulator();
         this.simulatorController = simulatorController;
         this.index = index;
 
@@ -38,9 +36,10 @@ public class CellShape extends Polygon {
     }
 
     private void onClick(InputEvent event) {
+        Simulator simulator = RuleSeeker.getInstance().getSimulator();
         int state = simulatorController.getSelectedState();
 
-        synchronized (this.simulator) {
+        synchronized (simulator) {
             simulator.getGrid().setTileState(index, state);
         }
 
@@ -48,12 +47,16 @@ public class CellShape extends Polygon {
     }
 
     public void updateColor(int state) {
+        Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
         fillProperty().setValue(simulator.getStateColoringMethod().getColors(simulator.getRuleSet()).get(state));
     }
 
     public void updateColor() {
-        synchronized (this.simulator) {
-            updateColor(this.simulator.getGrid().getTileState(index));
+        Simulator simulator = RuleSeeker.getInstance().getSimulator();
+
+        synchronized (simulator) {
+            updateColor(simulator.getGrid().getTileState(index));
         }
     }
 
