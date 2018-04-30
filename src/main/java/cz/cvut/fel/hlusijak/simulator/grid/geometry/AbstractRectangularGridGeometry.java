@@ -24,4 +24,14 @@ public abstract class AbstractRectangularGridGeometry implements GridGeometry {
     public Vector2i getDimensions() {
         return dimensions;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AbstractRectangularGridGeometry)) {
+            return false;
+        }
+
+        AbstractRectangularGridGeometry other = (AbstractRectangularGridGeometry) o;
+        return dimensions.equals(other.dimensions) && getClass().equals(other.getClass());
+    }
 }

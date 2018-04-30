@@ -78,4 +78,14 @@ public class Grid {
 
         return cloned;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Grid)) {
+            return false;
+        }
+
+        Grid other = (Grid) o;
+        return geometry.equals(other.geometry) && Arrays.equals(states, other.states);
+    }
 }

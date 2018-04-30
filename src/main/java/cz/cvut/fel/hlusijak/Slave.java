@@ -1,13 +1,20 @@
 package cz.cvut.fel.hlusijak;
 
+import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.command.CommandSlave;
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
+import cz.cvut.fel.hlusijak.network.MiningRequestPacket;
 import cz.cvut.fel.hlusijak.network.Network;
 import cz.cvut.fel.hlusijak.network.Packet;
+import cz.cvut.fel.hlusijak.simulator.Simulator;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.util.SerializationUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +23,8 @@ import java.util.Optional;
 
 public class Slave extends Listener implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Slave.class);
+    private Miner miner = new Miner(this::onResultFound);
+    private Client client;
     private CommandSlave options;
 
     public Slave(CommandSlave options) {
@@ -26,7 +35,8 @@ public class Slave extends Listener implements Runnable {
         validateOptions();
 
         int port = Optional.ofNullable(options.masterPort).orElse(Network.SERVER_PORT_DEFAULT);
-        Client client = new Client();
+        // TODO: might want to raise this to allow larger grids
+        client = new Client(8192, 8192);
 
         Network.register(client);
         client.addListener(this);
@@ -62,6 +72,10 @@ public class Slave extends Listener implements Runnable {
         }
     }
 
+    private void onResultFound(RuleSet result) {
+        System.out.println("Result found: " + result);
+    }
+
     @Override
     public void connected(Connection connection) {
         LOGGER.info("Sending connection request packet to {}", connection.getRemoteAddressTCP());
@@ -75,6 +89,11 @@ public class Slave extends Listener implements Runnable {
         }
 
         LOGGER.debug("Received packet from {}: {}", connection.getRemoteAddressTCP(), packet);
+
+        if (packet instanceof MiningRequestPacket) {
+            MiningRequestPacket mrp = (MiningRequestPacket) packet;
+            miner.mine(mrp.getSeed(), mrp.getMinIterations(), mrp.getMaxIterations()).join();
+        }
     }
 
     @Override
