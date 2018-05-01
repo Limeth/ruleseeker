@@ -14,21 +14,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import cz.cvut.fel.hlusijak.simulator.SimulatorApplication;
+
 public class FutureUtil {
     private static final ExecutorService BACKGROUND_EXECUTOR = Executors.newWorkStealingPool();
     private static final ExecutorService JFX_EXECUTOR = new JFXExecutor();
 
     public static <T> CompletableFuture<T> futureTask(Supplier<T> supplier, ExecutorService executor) {
-        CompletableFuture<T> future = new CompletableFuture<>();
-        Task<T> task = new TaskImpl<>(supplier, future);
+        // Decide whether to use JFX tasks or just regular futures, because JFX
+        // is special like that. :^)
+        if (SimulatorApplication.isJFXInitialized()) {
+            CompletableFuture<T> future = new CompletableFuture<>();
+            Task<T> task = new TaskImpl<>(supplier, future);
 
-        task.setOnSucceeded(event -> future.complete(task.getValue()));
-        task.setOnCancelled(event -> future.cancel(false));
-        task.setOnFailed(event -> future.completeExceptionally(task.getException()));
+            task.setOnSucceeded(event -> future.complete(task.getValue()));
+            task.setOnCancelled(event -> future.cancel(false));
+            task.setOnFailed(event -> future.completeExceptionally(task.getException()));
 
-        executor.submit(task);
+            executor.submit(task);
 
-        return future;
+            return future;
+        } else {
+            return CompletableFuture.supplyAsync(supplier, executor);
+        }
     }
 
     public static CompletableFuture<Void> futureTask(Runnable runnable, ExecutorService executor) {

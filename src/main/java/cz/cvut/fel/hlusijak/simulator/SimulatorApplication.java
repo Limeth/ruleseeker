@@ -23,6 +23,12 @@ import org.slf4j.LoggerFactory;
 
 public class SimulatorApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorApplication.class);
+    private static boolean JFX_INITIALIZED = false;
+
+    @Override
+    public void init() {
+        JFX_INITIALIZED = true;
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -59,5 +65,9 @@ public class SimulatorApplication extends Application {
         Simulator simulator = new Simulator(grid, ruleSet, stateColoringMethod, 10);
 
         RuleSeeker.getInstance().setSimulator(simulator);
+    }
+
+    public static boolean isJFXInitialized() {
+        return JFX_INITIALIZED;
     }
 }
