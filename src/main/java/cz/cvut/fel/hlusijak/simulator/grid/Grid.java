@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak.simulator.grid;
 
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.util.VariedUtil;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -11,11 +12,11 @@ import java.util.Random;
  */
 public class Grid {
     private final GridGeometry geometry;
-    private final int[] states;
+    private final byte[] states;
 
     public Grid(GridGeometry geometry) {
         this.geometry = geometry;
-        this.states = new int[geometry.getSize()];
+        this.states = new byte[geometry.getSize()];
     }
 
     private Grid() {
@@ -32,7 +33,7 @@ public class Grid {
      * @param tileIndex The index of the tile to get the state index of.
      * @return The state index of the specified tile.
      */
-    public int getTileState(int tileIndex) {
+    public byte getTileState(int tileIndex) {
         return states[tileIndex];
     }
 
@@ -41,7 +42,7 @@ public class Grid {
      * @param tileState The new state index of the tile.
      * @return The previous state index of the specified tile.
      */
-    public int setTileState(int tileIndex, int tileState) {
+    public int setTileState(int tileIndex, byte tileState) {
         int tmp = states[tileIndex];
         states[tileIndex] = tileState;
 
@@ -51,9 +52,7 @@ public class Grid {
     public void randomizeTileStates(Random rng, RuleSet ruleSet) {
         int numberOfStates = ruleSet.getNumberOfStates();
 
-        for (int i = 0; i < states.length; i++) {
-            states[i] = rng.nextInt(numberOfStates);
-        }
+        VariedUtil.randomBoundedByteArray(rng, states, numberOfStates);
     }
 
     /**
@@ -61,11 +60,11 @@ public class Grid {
      *                        indices from.
      * @param tileStates The new state indices.
      */
-    public void setTileStates(int tileIndexOffset, int[] tileStates) {
+    public void setTileStates(int tileIndexOffset, byte[] tileStates) {
         System.arraycopy(tileStates, 0, states, tileIndexOffset, tileStates.length);
     }
 
-    public void fillTileStates(int state) {
+    public void fillTileStates(byte state) {
         Arrays.fill(this.states, state);
     }
 

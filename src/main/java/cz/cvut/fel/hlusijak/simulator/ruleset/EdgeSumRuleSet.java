@@ -6,11 +6,11 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class EdgeSumRuleSet extends SumRuleSet<GridGeometry> {
-    public EdgeSumRuleSet(GridGeometry gridGeometry, int states, int[] rules) {
+    public EdgeSumRuleSet(GridGeometry gridGeometry, byte states, byte[] rules) {
         super(gridGeometry, states, rules);
     }
 
-    public EdgeSumRuleSet(GridGeometry gridGeometry, int states) {
+    public EdgeSumRuleSet(GridGeometry gridGeometry, byte states) {
         super(gridGeometry, states, null);
     }
 

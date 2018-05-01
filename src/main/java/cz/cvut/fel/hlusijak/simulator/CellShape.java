@@ -11,7 +11,7 @@ public class CellShape extends Polygon {
     private final SimulatorController simulatorController;
     private final int index;
 
-    public CellShape(SimulatorController simulatorController, int index, int state, Vector2d... vertices) {
+    public CellShape(SimulatorController simulatorController, int index, byte state, Vector2d... vertices) {
         super();
 
         this.simulatorController = simulatorController;
@@ -37,7 +37,7 @@ public class CellShape extends Polygon {
 
     private void onClick(InputEvent event) {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
-        int state = simulatorController.getSelectedState();
+        byte state = simulatorController.getSelectedState();
 
         synchronized (simulator) {
             simulator.getGrid().setTileState(index, state);
@@ -46,7 +46,7 @@ public class CellShape extends Polygon {
         updateColor(state);
     }
 
-    public void updateColor(int state) {
+    public void updateColor(byte state) {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
         fillProperty().setValue(simulator.getStateColoringMethod().getColors(simulator.getRuleSet()).get(state));

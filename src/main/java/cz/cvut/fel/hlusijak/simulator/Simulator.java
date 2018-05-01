@@ -54,7 +54,7 @@ public class Simulator {
         final int taskCount = gridSize / cellsPerTask + (additionalTask ? 1 : 0);
         // Wow, Java, nice generics.
         //noinspection unchecked
-        CompletableFuture<int[]>[] tasks = new CompletableFuture[taskCount];
+        CompletableFuture<byte[]>[] tasks = new CompletableFuture[taskCount];
 
         for (int taskIndex = 0; taskIndex < taskCount; taskIndex += 1) {
             final int currentTaskIndex = taskIndex;
@@ -66,9 +66,9 @@ public class Simulator {
                 currentCellsPerTask = cellsPerTask;
             }
 
-            CompletableFuture<int[]> taskFuture = FutureUtil.futureTaskBackground(() -> {
+            CompletableFuture<byte[]> taskFuture = FutureUtil.futureTaskBackground(() -> {
                 final int cellIndexOffset = currentTaskIndex * cellsPerTask;
-                final int[] newStates = new int[currentCellsPerTask];
+                final byte[] newStates = new byte[currentCellsPerTask];
 
                 for (int relativeTileIndex = 0; relativeTileIndex < currentCellsPerTask; relativeTileIndex += 1) {
                     int absoluteTileIndex = relativeTileIndex + cellIndexOffset;
@@ -86,8 +86,8 @@ public class Simulator {
         Supplier<Integer> combine = () -> {
             int offset = 0;
 
-            for (CompletableFuture<int[]> task : tasks) {
-                int[] newStates;
+            for (CompletableFuture<byte[]> task : tasks) {
+                byte[] newStates;
 
                 try {
                     newStates = task.get();

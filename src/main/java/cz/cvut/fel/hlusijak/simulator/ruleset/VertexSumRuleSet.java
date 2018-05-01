@@ -6,11 +6,11 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class VertexSumRuleSet extends SumRuleSet<GridGeometry> {
-    public VertexSumRuleSet(GridGeometry gridGeometry, int states, int[] rules) {
+    public VertexSumRuleSet(GridGeometry gridGeometry, byte states, byte[] rules) {
         super(gridGeometry, states, rules);
     }
 
-    public VertexSumRuleSet(GridGeometry gridGeometry, int states) {
+    public VertexSumRuleSet(GridGeometry gridGeometry, byte states) {
         super(gridGeometry, states, null);
     }
 

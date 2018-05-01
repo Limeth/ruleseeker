@@ -1,24 +1,14 @@
 package cz.cvut.fel.hlusijak.util;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import javafx.scene.paint.Color;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import com.esotericsoftware.kryonet.KryoSerialization;
-
-import org.objenesis.instantiator.ObjectInstantiator;
-
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
 import cz.cvut.fel.hlusijak.network.ConnectionResultPacket;
 import cz.cvut.fel.hlusijak.network.MiningRequestPacket;
 import cz.cvut.fel.hlusijak.network.MiningResultPacket;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
@@ -26,6 +16,11 @@ import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
+import javafx.scene.paint.Color;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public final class SerializationUtil {
     public static void register(Kryo kryo) {
@@ -44,6 +39,7 @@ public final class SerializationUtil {
         kryo.register(CustomStateColoringMethod.class);
         kryo.register(HueStateColoringMethod.class);
 
+        kryo.register(byte[].class);
         kryo.register(int[].class);
         kryo.register(ArrayList.class, new CollectionSerializer());
         kryo.register(Color.class, new ColorSerializer());

@@ -92,7 +92,7 @@ public class Slave extends Listener implements Runnable {
 
         if (packet instanceof MiningRequestPacket) {
             MiningRequestPacket mrp = (MiningRequestPacket) packet;
-            miner.mine(mrp.getSeed(), mrp.getMinIterations(), mrp.getMaxIterations()).join();
+            miner.mine(mrp.getSeed(), mrp.getMinIterations(), mrp.getMaxIterations());
         }
     }
 

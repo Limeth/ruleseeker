@@ -4,22 +4,21 @@ import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
-import cz.cvut.fel.hlusijak.util.Vector2i;
-import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
+import cz.cvut.fel.hlusijak.util.Vector2i;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SimulatorApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorApplication.class);
@@ -53,7 +52,7 @@ public class SimulatorApplication extends Application {
     private void initSimulator() {
         Random rng = new Random();
         GridGeometry gridGeometry = new TriangleGridGeometry(Vector2i.of(50, 50));
-        RuleSet ruleSet = new VertexSumRuleSet(gridGeometry, 2);
+        RuleSet ruleSet = new VertexSumRuleSet(gridGeometry, (byte) 2);
 
         ruleSet.randomizeRules(rng);
 

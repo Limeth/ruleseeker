@@ -1,5 +1,8 @@
 package cz.cvut.fel.hlusijak.simulator;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import cz.cvut.fel.hlusijak.RuleSeeker;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
@@ -19,16 +22,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
-
+import javafx.stage.Stage;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,10 +40,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 
 public class SimulatorController implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorController.class);
@@ -62,7 +59,7 @@ public class SimulatorController implements Initializable {
     @FXML private Button pauseButton;
     @FXML private TextField intervalTextField;
     @FXML private Slider intervalSlider;
-    @FXML private ComboBox<Integer> editModeComboBox;
+    @FXML private ComboBox<Byte> editModeComboBox;
     @FXML private Button fillButton;
     @FXML private Button randomizeButton;
 
@@ -358,7 +355,7 @@ public class SimulatorController implements Initializable {
         viewPane.getChildren().clear();
 
         this.cellShapes = gridGeometry.tileIndexStream().boxed().map(tileIndex -> {
-            int state = finalGrid.getTileState(tileIndex);
+            byte state = finalGrid.getTileState(tileIndex);
             CellShape cellShape = new CellShape(this, tileIndex, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
                     .map(vertex -> vertex.mul(scale))
                     .map(offset::add).toArray(Vector2d[]::new));
@@ -369,7 +366,7 @@ public class SimulatorController implements Initializable {
         }).toArray(CellShape[]::new);
     }
 
-    public int getSelectedState() {
+    public byte getSelectedState() {
         return editModeComboBox.getValue();
     }
 

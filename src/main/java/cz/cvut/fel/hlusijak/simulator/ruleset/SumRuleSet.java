@@ -3,7 +3,6 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 import com.google.common.base.Preconditions;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleRecord;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -11,11 +10,11 @@ import java.util.stream.Stream;
 
 public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     protected final G gridGeometry;
-    protected final int states;
+    protected final byte states;
     protected final int neighbouringStateCombinations;
-    protected int[] rules;
+    protected byte[] rules;
 
-    public SumRuleSet(G gridGeometry, int states, int[] rules) {
+    public SumRuleSet(G gridGeometry, byte states, byte[] rules) {
         Preconditions.checkNotNull(gridGeometry);
         Preconditions.checkArgument(states >= 2, "The number of states must be at least 2.");
 
@@ -25,7 +24,7 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
         int requiredRulesLen = states * neighbouringStateCombinations;
 
         if (rules == null) {
-            rules = new int[requiredRulesLen];
+            rules = new byte[requiredRulesLen];
         } else {
             Preconditions.checkArgument(rules.length == requiredRulesLen,
                     String.format("The rules array must be of length %d, but is of length %d", requiredRulesLen, rules.length));
@@ -34,7 +33,7 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
         this.rules = rules;
     }
 
-    public SumRuleSet(G gridGeometry, int states) {
+    public SumRuleSet(G gridGeometry, byte states) {
         this(gridGeometry, states, null);
     }
 
@@ -48,11 +47,11 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     public abstract int getNeighbourhoodSize();
     public abstract IntStream neighbourhoodTileIndicesStream(int tileIndex);
 
-    public int[] getRules() {
+    public byte[] getRules() {
         return rules;
     }
 
-    public void setRules(int[] rules) {
+    public void setRules(byte[] rules) {
        Preconditions.checkArgument(rules.length == this.rules.length,
                String.format("The rules array must be of length %d, but is of length %d", this.rules.length, rules.length));
 
@@ -60,7 +59,7 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     }
 
     @Override
-    public int getNumberOfStates() {
+    public byte getNumberOfStates() {
         return states;
     }
 
@@ -75,8 +74,8 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     }
 
     @Override
-    public int getNextTileState(Grid grid, int tileIndex) {
-        int state = grid.getTileState(tileIndex);
+    public byte getNextTileState(Grid grid, int tileIndex) {
+        byte state = grid.getTileState(tileIndex);
         int[] neighbouringStateCount = countNeighbouringStates(grid, tileIndex);
         int ruleIndex = state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
 
@@ -88,7 +87,7 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
 
         return IntStream.range(0, rules.length).boxed()
             .map(index -> {
-                int previousState = index / this.neighbouringStateCombinations;
+                byte previousState = (byte) (index / this.neighbouringStateCombinations);
                 int combinationIndex = index % this.neighbouringStateCombinations;
                 int[] stateCount = combinationWithRepetition(neighbourhoodSize, states, combinationIndex);
 

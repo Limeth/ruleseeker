@@ -60,7 +60,7 @@ public class SettingsDialog extends Alert implements Initializable {
     // Rule Set tab {{{
     @FXML private Tab ruleSetTab;
     @FXML private ChoiceBox<RuleSetItem<?>> ruleSetTypeChoiceBox;
-    @FXML private Spinner<Integer> ruleSetCellStatesSpinner;
+    @FXML private Spinner<Integer> ruleSetCellStatesSpinner; // Int because there's no ByteSpinnerValueFactory
     @FXML private Button ruleSetResetRulesButton;
     @FXML private Button ruleSetRandomizeRulesButton;
     @FXML private ScrollPane ruleSetScrollPane;
@@ -139,9 +139,9 @@ public class SettingsDialog extends Alert implements Initializable {
 
     private void initializeGridTab() {
         gridGeometryChoiceBox.getItems().addAll(
-            new GridGeometryItem<TriangleGridGeometry>(TriangleGridGeometry.class, "Triangular", 2, 2, TriangleGridGeometry::new),
-            new GridGeometryItem<SquareGridGeometry>(SquareGridGeometry.class, "Rectangular", 1, 1, SquareGridGeometry::new),
-            new GridGeometryItem<HexagonGridGeometry>(HexagonGridGeometry.class, "Hexagonal", 1, 2, HexagonGridGeometry::new)
+            new GridGeometryItem<>(TriangleGridGeometry.class, "Triangular", 2, 2, TriangleGridGeometry::new),
+            new GridGeometryItem<>(SquareGridGeometry.class, "Rectangular", 1, 1, SquareGridGeometry::new),
+            new GridGeometryItem<>(HexagonGridGeometry.class, "Hexagonal", 1, 2, HexagonGridGeometry::new)
         );
         gridWidthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
         gridHeightSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
@@ -171,10 +171,10 @@ public class SettingsDialog extends Alert implements Initializable {
     private void initializeRuleSetTab() {
         ruleSetTypeChoiceBox.getItems().addAll(
             new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's generalized)", () -> {
-                return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
+                return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
             }),
             new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's generalized)", () -> {
-                return new VertexSumRuleSet(simulator.getGrid().getGeometry(), ruleSetCellStatesSpinner.getValue());
+                return new VertexSumRuleSet(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
             })
         );
         ruleSetCellStatesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, Integer.MAX_VALUE));
@@ -182,7 +182,7 @@ public class SettingsDialog extends Alert implements Initializable {
 
         // Assign defaults
         Item.selectByClass(ruleSetTypeChoiceBox, simulator.getRuleSet().getClass());
-        ruleSetCellStatesSpinner.getValueFactory().setValue(simulator.getRuleSet().getNumberOfStates());
+        ruleSetCellStatesSpinner.getValueFactory().setValue((int) simulator.getRuleSet().getNumberOfStates());
         renderRuleView();
 
         // Listeners
@@ -197,7 +197,7 @@ public class SettingsDialog extends Alert implements Initializable {
             }
 
             if (!oldValue.equals(newValue)) {
-                int[] rules = simulator.getRuleSet().getRules();
+                byte[] rules = simulator.getRuleSet().getRules();
 
                 for (int ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
                     if (rules[ruleIndex] >= newValue) {
@@ -212,7 +212,7 @@ public class SettingsDialog extends Alert implements Initializable {
             }
         });
         ruleSetResetRulesButton.setOnAction(event -> {
-            Arrays.fill(simulator.getRuleSet().getRules(), 0);
+            Arrays.fill(simulator.getRuleSet().getRules(), (byte) 0);
             renderRuleView();
         });
         ruleSetRandomizeRulesButton.setOnAction(event -> {
@@ -342,9 +342,9 @@ public class SettingsDialog extends Alert implements Initializable {
 
     private void updateRuleSet() {
         RuleSet previousRuleSet = simulator.getRuleSet();
-        int[] previousRules = previousRuleSet.getRules();
+        byte[] previousRules = previousRuleSet.getRules();
         RuleSet nextRuleSet = ruleSetTypeChoiceBox.getValue().constructor.get();
-        int[] nextRules = nextRuleSet.getRules();
+        byte[] nextRules = nextRuleSet.getRules();
 
         System.arraycopy(previousRules, 0, nextRules, 0, Math.min(previousRules.length, nextRules.length));
 
@@ -366,7 +366,7 @@ public class SettingsDialog extends Alert implements Initializable {
                 Node[] row = new Node[neighbourhoodSize + 2];
                 row[0] = buildStateNode(rule.getPreviousState());
                 int[] stateCount = rule.getStateCount();
-                int state = 0;
+                byte state = 0;
 
                 for (int neighbourIndex = 0; neighbourIndex < neighbourhoodSize; neighbourIndex++) {
                     while (stateCount[state] <= 0) {
@@ -377,15 +377,15 @@ public class SettingsDialog extends Alert implements Initializable {
                     stateCount[state]--;
                 }
 
-                ComboBox<Integer> nextStateComboBox = new ComboBox<>();
+                ComboBox<Byte> nextStateComboBox = new ComboBox<>();
 
                 ruleSet.stateStream().forEach(nextStateComboBox.getItems()::add);
 
-                ComboBox<Integer> stateComboBox = JFXUtil.buildStateComboBox(null, () -> simulator);
+                ComboBox<Byte> stateComboBox = JFXUtil.buildStateComboBox(null, () -> simulator);
 
                 stateComboBox.getSelectionModel().select(rule.getNextState());
                 stateComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-                    ruleSet.getRules()[rule.getIndex()] = newValue.intValue();
+                    ruleSet.getRules()[rule.getIndex()] = newValue.byteValue();
                 });
 
                 row[row.length - 1] = stateComboBox;
@@ -395,7 +395,7 @@ public class SettingsDialog extends Alert implements Initializable {
         ruleSetScrollPane.setContent(grid);
     }
 
-    private Node buildStateNode(int state) {
+    private Node buildStateNode(byte state) {
         final int POLYGON_SIZE = 20;
         Polygon polygon = new Polygon(0, 0, POLYGON_SIZE, 0, POLYGON_SIZE, POLYGON_SIZE, 0, POLYGON_SIZE);
         List<Paint> colors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());

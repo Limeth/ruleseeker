@@ -2,11 +2,11 @@ package cz.cvut.fel.hlusijak.simulator.ruleset;
 
 public class SumRuleRecord {
     private final int index;
-    private final int previousState;
+    private final byte previousState;
     private final int[] stateCount;
-    private final int nextState;
+    private final byte nextState;
 
-    public SumRuleRecord(int index, int previousState, int[] stateCount, int nextState) {
+    public SumRuleRecord(int index, byte previousState, int[] stateCount, byte nextState) {
         this.index = index;
         this.previousState = previousState;
         this.stateCount = stateCount;
@@ -23,7 +23,7 @@ public class SumRuleRecord {
     /**
      * @return the previousState
      */
-    public int getPreviousState() {
+    public byte getPreviousState() {
         return previousState;
     }
 
@@ -41,7 +41,7 @@ public class SumRuleRecord {
     /**
      * @return the nextState
      */
-    public int getNextState() {
+    public byte getNextState() {
         return nextState;
     }
 }

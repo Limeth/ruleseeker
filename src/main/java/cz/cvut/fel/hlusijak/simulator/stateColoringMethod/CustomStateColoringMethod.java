@@ -1,20 +1,18 @@
 package cz.cvut.fel.hlusijak.simulator.stateColoringMethod;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.Paint;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableList.Builder;
-
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import javafx.scene.paint.Paint;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.Stop;
-import javafx.scene.paint.CycleMethod;
 
 public class CustomStateColoringMethod implements StateColoringMethod {
     private static final Paint PLACEHOLDER_COLOR = new RadialGradient(
@@ -34,7 +32,7 @@ public class CustomStateColoringMethod implements StateColoringMethod {
         int states = ruleSet.getNumberOfStates();
         Builder<Paint> builder = ImmutableList.builderWithExpectedSize(states);
 
-        for (int state = 0; state < states; state++) {
+        for (byte state = 0; state < states; state++) {
             if (state < colors.size()) {
                 builder.add(colors.get(state));
             } else {

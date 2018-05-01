@@ -46,8 +46,8 @@ public final class JFXUtil {
         observableValue.addListener(listener);
     }
 
-    public static ComboBox<Integer> buildStateComboBox(ComboBox<Integer> comboBoxArg, Supplier<Simulator> simulatorSupplier) {
-        final ComboBox<Integer> comboBox;
+    public static ComboBox<Byte> buildStateComboBox(ComboBox<Byte> comboBoxArg, Supplier<Simulator> simulatorSupplier) {
+        final ComboBox<Byte> comboBox;
 
         if (comboBoxArg == null) {
             comboBox = new ComboBox<>();
@@ -58,9 +58,9 @@ public final class JFXUtil {
         comboBox.getSelectionModel().clearSelection();
         comboBox.getItems().clear();
         comboBox.setCellFactory(null);
-        comboBox.setCellFactory(listView -> new ListCell<Integer>() {
+        comboBox.setCellFactory(listView -> new ListCell<Byte>() {
             @Override
-            protected void updateItem(Integer item, boolean empty) {
+            protected void updateItem(Byte item, boolean empty) {
                 super.updateItem(item, empty);
 
                 if (item == null || empty) {
@@ -70,12 +70,12 @@ public final class JFXUtil {
                 Simulator simulator = simulatorSupplier.get();
                 List<Paint> stateColors = simulator.getStateColoringMethod().getColors(simulator.getRuleSet());
 
-                setText(Integer.toString(item));
+                setText(Byte.toString(item));
                 setBackground(new Background(new BackgroundFill(stateColors.get(item), null, null)));
             }
         });
 
-        ChangeListener<Integer> listener = (observable, oldValue, newValue) -> {
+        ChangeListener<Byte> listener = (observable, oldValue, newValue) -> {
             Paint paint;
 
             if (newValue != null) {
