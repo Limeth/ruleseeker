@@ -2,6 +2,7 @@ package cz.cvut.fel.hlusijak;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
@@ -14,6 +15,7 @@ import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
 import cz.cvut.fel.hlusijak.network.ConnectionResultPacket;
 import cz.cvut.fel.hlusijak.network.MiningRequestPacket;
+import cz.cvut.fel.hlusijak.network.MiningResultPacket;
 import cz.cvut.fel.hlusijak.network.Network;
 import cz.cvut.fel.hlusijak.network.Packet;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
@@ -26,6 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Set;
 
@@ -85,6 +90,28 @@ public class Master extends Listener implements Runnable {
         LOGGER.info("Receiving connection from {}...", connection.getRemoteAddressTCP());
     }
 
+    private void handlePacket(Connection connection, Packet packet) throws IOException {
+        if (packet instanceof MiningResultPacket) {
+            MiningResultPacket miningResultPacket = (MiningResultPacket) packet;
+            Kryo kryo = server.getKryo();
+            LocalDateTime date = LocalDateTime.now();
+            String fileName = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date)
+                .replace(':', '-') + ".rssim";
+            Path path = Paths.get(options.outputDirectory, fileName).toAbsolutePath();
+            Output output = new Output(Files.newOutputStream(path));
+            Simulator simulator = seed.clone();
+
+            simulator.setRuleSet(miningResultPacket.getRuleSet());
+
+            try {
+                Files.createDirectories(path.getParent());
+                kryo.writeObject(output, simulator);
+            } finally {
+                output.close();
+            }
+        }
+    }
+
     @Override
     public void received(Connection connection, Object packet) {
         if (!(packet instanceof Packet)) {
@@ -94,7 +121,11 @@ public class Master extends Listener implements Runnable {
         LOGGER.debug("Received packet from {}: {}", connection.getRemoteAddressTCP(), packet);
 
         if (approvedConnections.contains(connection)) {
-
+            try {
+                handlePacket(connection, (Packet) packet);
+            } catch (IOException e) {
+                LOGGER.error("An error occurred while trying to handle a packet", e);
+            }
         } else if (packet instanceof ConnectionRequestPacket) {
             LOGGER.debug("Received connection request packet from {}", connection.getRemoteAddressTCP());
             ConnectionRequestPacket crp = (ConnectionRequestPacket) packet;

@@ -2,8 +2,6 @@ package cz.cvut.fel.hlusijak;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.esotericsoftware.minlog.Log;
-
 import cz.cvut.fel.hlusijak.command.Args;
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.command.CommandSlave;
@@ -23,7 +21,7 @@ public class RuleSeeker implements Runnable {
     private Simulator simulator;
 
     private RuleSeeker(String[] rawArgs) {
-        Log.TRACE();
+        // Log.TRACE();
         instance = this;
         this.rawArgs = rawArgs;
 

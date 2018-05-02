@@ -1,17 +1,16 @@
 package cz.cvut.fel.hlusijak;
 
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cz.cvut.fel.hlusijak.simulator.IterationResult;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import cz.cvut.fel.hlusijak.util.FutureUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class Miner {
     private static final Logger LOGGER = LoggerFactory.getLogger(Miner.class);
@@ -42,10 +41,6 @@ public class Miner {
     }
 
     private CompletableFuture<?> startMining() {
-        if (simulation != null) {
-            simulation.join();
-        }
-
         synchronized (this) {
             currentSimulator = currentSimulatorSeed.clone();
 
@@ -60,6 +55,8 @@ public class Miner {
             int iterations = iterationResult.getIterationsCompleted();
             Grid previousGrid = iterationResult.getPreviousGrid();
             Grid nextGrid = iterationResult.getNextGrid();
+
+                LOGGER.info("Iter #" + iterations);
 
             if (previousGrid.equals(nextGrid) || iterations > maxIterations) {
                 LOGGER.info("Iter #" + iterations);

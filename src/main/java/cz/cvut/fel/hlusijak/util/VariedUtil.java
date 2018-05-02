@@ -16,7 +16,7 @@ public final class VariedUtil {
                 .parallel()
                 .forEach(i -> {
                     if (result[i] < 0) {
-                        result[i] *= -1;
+                        result[i] = (byte) -(result[i] + 1); // Can't just reverse, because -128 * (-1) results in -128
                     }
 
                     result[i] %= bound; // Good enough

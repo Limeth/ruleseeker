@@ -12,6 +12,9 @@ public class CommandMaster {
     @Parameter(names = {"--port", "-p"}, description = "Port to listen on for the inbound master connection")
     public Integer port;
 
+    @Parameter(names = {"--output-directory", "-o"}, description = "Path to the directory to create and store the results in")
+    public String outputDirectory;
+
     // There's a bug in JCommander where main arguments may not use custom type
     // converters.
     @Parameter(description = "The initial state of the grid")
