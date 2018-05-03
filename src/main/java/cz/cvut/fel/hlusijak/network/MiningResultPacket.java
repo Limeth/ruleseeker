@@ -1,29 +1,34 @@
 package cz.cvut.fel.hlusijak.network;
 
-import java.util.Optional;
-
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import java.util.Arrays;
 
 public class MiningResultPacket implements Packet {
-    private final RuleSet ruleSet;
+    private final byte[] ruleSetChunk;
+    private final int ruleSetChunkOffset;
 
-    public MiningResultPacket(RuleSet ruleSet) {
-        this.ruleSet = ruleSet;
+    public MiningResultPacket(byte[] ruleSetChunk, int ruleSetChunkOffset) {
+        this.ruleSetChunk = ruleSetChunk;
+        this.ruleSetChunkOffset = ruleSetChunkOffset;
     }
 
     // Kryonet requires a default constructor for registered classes
     private MiningResultPacket() {
-        this(null);
+        this(null, 0);
     }
 
-    public RuleSet getRuleSet() {
-        return ruleSet;
+    public byte[] getRuleSetChunk() {
+        return ruleSetChunk;
+    }
+
+    public int getRuleSetChunkOffset() {
+        return ruleSetChunkOffset;
     }
 
     @Override
     public String toString() {
         return "MiningResultPacket{" +
-                "ruleSet='" + ruleSet + '\'' +
+                "ruleSetChunk='" + Arrays.toString(ruleSetChunk) + '\'' +
+                ", ruleSetChunkOffset='" + ruleSetChunkOffset + '\'' +
                 '}';
     }
 }

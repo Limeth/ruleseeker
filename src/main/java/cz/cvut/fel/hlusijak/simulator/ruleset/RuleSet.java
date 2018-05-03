@@ -81,6 +81,19 @@ public class RuleSet {
         return Arrays.copyOf(rules, rules.length);
     }
 
+    public byte[] getRuleSetChunk(int offset, int maxLength) {
+        int length = Math.max(0, Math.min(rules.length - offset, maxLength));
+        byte[] result = new byte[length];
+
+        if (length <= 0) {
+            return result;
+        }
+
+        System.arraycopy(rules, offset, result, 0, length);
+
+        return result;
+    }
+
     /**
      * @param rules An array of next states where the index is a representation of
      *              the tiles' surroundings.

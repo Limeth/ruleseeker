@@ -7,6 +7,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
@@ -18,6 +19,7 @@ import cz.cvut.fel.hlusijak.network.Packet;
 import cz.cvut.fel.hlusijak.network.SeedGridChunkPacket;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
 import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -86,24 +89,41 @@ public class Master extends Listener implements Runnable {
         LOGGER.info("Receiving connection from {}...", connection.getRemoteAddressTCP());
     }
 
+    private final Map<Connection, byte[]> resultMap = Maps.newIdentityHashMap();
+
+    private void exportResult(byte[] rules) throws IOException {
+        Kryo kryo = server.getKryo();
+        LocalDateTime date = LocalDateTime.now();
+        String fileName = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date)
+                .replace(':', '-') + ".rssim";
+        Path path = Paths.get(options.outputDirectory, fileName).toAbsolutePath();
+        Output output = new Output(Files.newOutputStream(path));
+        Simulator simulator = seed.clone();
+        RuleSet ruleSet = simulator.getRuleSet();
+
+        ruleSet.setRules(rules);
+
+        try {
+            Files.createDirectories(path.getParent());
+            kryo.writeObject(output, simulator);
+            LOGGER.info("Written result to {}", path);
+        } finally {
+            output.close();
+        }
+    }
+
     private void handlePacket(Connection connection, Packet packet) throws IOException {
         if (packet instanceof MiningResultPacket) {
-            MiningResultPacket miningResultPacket = (MiningResultPacket) packet;
-            Kryo kryo = server.getKryo();
-            LocalDateTime date = LocalDateTime.now();
-            String fileName = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(date)
-                .replace(':', '-') + ".rssim";
-            Path path = Paths.get(options.outputDirectory, fileName).toAbsolutePath();
-            Output output = new Output(Files.newOutputStream(path));
-            Simulator simulator = seed.clone();
+            MiningResultPacket mrp = (MiningResultPacket) packet;
+            int ruleSetSize = seed.getRuleSet().getType().getRuleSetSize();
+            boolean lastChunk = mrp.getRuleSetChunkOffset() + mrp.getRuleSetChunk().length >= ruleSetSize;
+            byte[] rules = resultMap.computeIfAbsent(connection, key -> new byte[ruleSetSize]);
 
-            simulator.setRuleSet(miningResultPacket.getRuleSet());
+            System.arraycopy(mrp.getRuleSetChunk(), 0, rules, mrp.getRuleSetChunkOffset(), mrp.getRuleSetChunk().length);
 
-            try {
-                Files.createDirectories(path.getParent());
-                kryo.writeObject(output, simulator);
-            } finally {
-                output.close();
+            if (lastChunk) {
+                resultMap.remove(connection);
+                exportResult(rules);
             }
         }
     }

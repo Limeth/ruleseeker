@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class Slave extends Listener implements Runnable {
+    private static int RULE_SET_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(Slave.class);
     private Miner miner = new Miner(this::onResultFound);
     private Client client;
@@ -77,7 +78,20 @@ public class Slave extends Listener implements Runnable {
 
     private void onResultFound(RuleSet result) {
         LOGGER.info("Result found: " + result);
-        client.sendTCP(new MiningResultPacket(result));
+
+        int chunkOffset = 0;
+
+        while (true) {
+            byte[] chunk = result.getRuleSetChunk(chunkOffset, RULE_SET_CHUNK_MAX_LENGTH);
+
+            if (chunk.length <= 0) {
+                break;
+            }
+
+            client.sendTCP(new MiningResultPacket(chunk, chunkOffset));
+
+            chunkOffset += RULE_SET_CHUNK_MAX_LENGTH;
+        }
     }
 
     @Override
@@ -97,7 +111,7 @@ public class Slave extends Listener implements Runnable {
         if (packet instanceof MiningRequestPacket) {
             MiningRequestPacket mrp = (MiningRequestPacket) packet;
 
-            this.seed = new Simulator(new Grid(mrp.getGridGeometry()), mrp.getOriginalRuleSet(), null);
+            this.seed = new Simulator(new Grid(mrp.getGridGeometry()), new RuleSet(mrp.getRuleSetType()), null);
             this.minIterations = mrp.getMinIterations();
             this.maxIterations = mrp.getMaxIterations();
         } else if (packet instanceof SeedGridChunkPacket) {
