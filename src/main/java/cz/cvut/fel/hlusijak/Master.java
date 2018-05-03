@@ -41,6 +41,9 @@ public class Master extends Listener implements Runnable {
     private Simulator seed; // Stores the initial state of the grid
     private Set<Connection> approvedConnections = Sets.newHashSet();
 
+    // TODO
+    private int minIterations, maxIterations;
+
     public Master(CommandMaster options) {
         this.options = options;
     }
@@ -65,6 +68,14 @@ public class Master extends Listener implements Runnable {
     private void validateOptions() {
         try {
             Preconditions.checkNotNull(options.fileName, "The simulation file must be specified.");
+            Preconditions.checkNotNull(options.survivalRange, "At least one rule set fitness condition must be specified.");
+
+            try {
+                this.minIterations = Integer.parseInt(options.survivalRange.get(0));
+                this.maxIterations = Integer.parseInt(options.survivalRange.get(1));
+            } catch (NumberFormatException e) {
+                throw new Exception("Invalid survival range.");
+            }
 
             Path path = Paths.get(options.fileName);
 
@@ -129,7 +140,7 @@ public class Master extends Listener implements Runnable {
     }
 
     private void requestMining(Connection connection) {
-        connection.sendTCP(new MiningRequestPacket(seed, 50, 200));
+        connection.sendTCP(new MiningRequestPacket(seed, minIterations, maxIterations));
 
         Grid grid = seed.getGrid();
         int chunkOffset = 0;
