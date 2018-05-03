@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class Miner {
@@ -17,6 +18,7 @@ public class Miner {
 
     private Consumer<RuleSet> resultConsumer;
     private Random rng;
+    private AtomicInteger requestId = new AtomicInteger(0); // Used to detect whether the current request has been cancelled
 
     private Simulator seed;
     private int minIterations;
@@ -42,16 +44,25 @@ public class Miner {
 
     private CompletableFuture<?> startMining() {
         synchronized (this) {
+            final int originalRequestId = requestId.get();
             currentSimulator = currentSimulatorSeed.clone();
 
             currentSimulator.getRuleSet().randomizeRules(rng);
 
-            return simulation = currentSimulator.runAsync(this::onIterationComplete);
+            return simulation = currentSimulator.runAsync(iterationResult -> onIterationComplete(iterationResult, originalRequestId));
         }
     }
 
-    private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {
+    public void cancel() {
+        requestId.incrementAndGet();
+    }
+
+    private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult, int originalRequestId) {
         return FutureUtil.futureTaskBackground(() -> {
+            if (requestId.get() != originalRequestId) {
+                return false;
+            }
+
             int iterations = iterationResult.getIterationsCompleted();
             Grid previousGrid = iterationResult.getPreviousGrid();
             Grid nextGrid = iterationResult.getNextGrid();

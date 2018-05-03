@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class Slave extends Listener implements Runnable {
     private static int RULE_SET_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
@@ -130,5 +131,6 @@ public class Slave extends Listener implements Runnable {
     @Override
     public void disconnected(Connection connection) {
         LOGGER.info("Connection closed");
+        miner.cancel();
     }
 }
