@@ -5,7 +5,7 @@ import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSetType;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
 import cz.cvut.fel.hlusijak.util.Vector2i;
@@ -52,7 +52,7 @@ public class SimulatorApplication extends Application {
     private void initSimulator() {
         Random rng = new Random();
         GridGeometry gridGeometry = new TriangleGridGeometry(Vector2i.of(50, 50));
-        RuleSet ruleSet = new VertexSumRuleSet(gridGeometry, (byte) 2);
+        RuleSet ruleSet = new RuleSet(new VertexSumRuleSetType(gridGeometry, (byte) 2));
 
         ruleSet.randomizeRules(rng);
 

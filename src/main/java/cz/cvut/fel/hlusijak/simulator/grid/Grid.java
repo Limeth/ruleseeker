@@ -50,7 +50,7 @@ public class Grid {
     }
 
     public void randomizeTileStates(Random rng, RuleSet ruleSet) {
-        int numberOfStates = ruleSet.getNumberOfStates();
+        int numberOfStates = ruleSet.getType().getNumberOfStates();
 
         VariedUtil.randomBoundedByteArray(rng, states, numberOfStates);
     }

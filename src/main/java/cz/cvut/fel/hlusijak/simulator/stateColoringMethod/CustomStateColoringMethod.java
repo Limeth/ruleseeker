@@ -29,7 +29,7 @@ public class CustomStateColoringMethod implements StateColoringMethod {
 
     @Override
     public List<Paint> getColors(RuleSet ruleSet) {
-        int states = ruleSet.getNumberOfStates();
+        int states = ruleSet.getType().getNumberOfStates();
         Builder<Paint> builder = ImmutableList.builderWithExpectedSize(states);
 
         for (byte state = 0; state < states; state++) {

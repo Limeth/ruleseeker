@@ -8,59 +8,46 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
+public abstract class SumRuleSetType<G extends GridGeometry> implements RuleSetType {
     protected final G gridGeometry;
     protected final byte states;
     protected final int neighbouringStateCombinations;
-    protected byte[] rules;
+    protected final int ruleSetSize;
 
-    public SumRuleSet(G gridGeometry, byte states, byte[] rules) {
+    public SumRuleSetType(G gridGeometry, byte states) {
         Preconditions.checkNotNull(gridGeometry);
         Preconditions.checkArgument(states >= 2, "The number of states must be at least 2.");
 
         this.gridGeometry = gridGeometry;
         this.states = states;
         this.neighbouringStateCombinations = Math.toIntExact(combinationsWithRepetitions(getNeighbourhoodSize(), states));
-        int requiredRulesLen = states * neighbouringStateCombinations;
-
-        if (rules == null) {
-            rules = new byte[requiredRulesLen];
-        } else {
-            Preconditions.checkArgument(rules.length == requiredRulesLen,
-                    String.format("The rules array must be of length %d, but is of length %d", requiredRulesLen, rules.length));
-        }
-
-        this.rules = rules;
+        this.ruleSetSize = states * neighbouringStateCombinations;
     }
 
-    public SumRuleSet(G gridGeometry, byte states) {
-        this(gridGeometry, states, null);
-    }
-
-    protected SumRuleSet() {
+    protected SumRuleSetType() {
         // Required by Kryo
         this.gridGeometry = null;
         this.states = 0;
         this.neighbouringStateCombinations = 0;
+        this.ruleSetSize = 0;
     }
 
     public abstract int getNeighbourhoodSize();
     public abstract IntStream neighbourhoodTileIndicesStream(int tileIndex);
 
-    public byte[] getRules() {
-        return rules;
-    }
-
-    public void setRules(byte[] rules) {
-       Preconditions.checkArgument(rules.length == this.rules.length,
-               String.format("The rules array must be of length %d, but is of length %d", this.rules.length, rules.length));
-
-       this.rules = rules;
+    @Override
+    public G getGridGeometry() {
+        return gridGeometry;
     }
 
     @Override
     public byte getNumberOfStates() {
         return states;
+    }
+
+    @Override
+    public int getRuleSetSize() {
+        return ruleSetSize;
     }
 
     private int[] countNeighbouringStates(Grid grid, int tileIndex) {
@@ -74,24 +61,23 @@ public abstract class SumRuleSet<G extends GridGeometry> implements RuleSet {
     }
 
     @Override
-    public byte getNextTileState(Grid grid, int tileIndex) {
+    public int getRuleIndex(Grid grid, int tileIndex) {
         byte state = grid.getTileState(tileIndex);
         int[] neighbouringStateCount = countNeighbouringStates(grid, tileIndex);
-        int ruleIndex = state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
 
-        return rules[ruleIndex];
+        return state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
     }
 
-    public Stream<SumRuleRecord> enumerateRules() {
+    public Stream<SumRuleRecord> enumerateRules(RuleSet ruleSet) {
         final int neighbourhoodSize = getNeighbourhoodSize();
 
-        return IntStream.range(0, rules.length).boxed()
+        return IntStream.range(0, ruleSetSize).boxed()
             .map(index -> {
                 byte previousState = (byte) (index / this.neighbouringStateCombinations);
                 int combinationIndex = index % this.neighbouringStateCombinations;
                 int[] stateCount = combinationWithRepetition(neighbourhoodSize, states, combinationIndex);
 
-                return new SumRuleRecord(index, previousState, stateCount, rules[index]);
+                return new SumRuleRecord(index, previousState, stateCount, ruleSet.getRule(index));
             });
     }
 

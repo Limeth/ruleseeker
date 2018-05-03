@@ -35,7 +35,7 @@ public class HueStateColoringMethod implements StateColoringMethod {
 
     @Override
     public List<Paint> getColors(RuleSet ruleSet) {
-        byte states = ruleSet.getNumberOfStates();
+        byte states = ruleSet.getType().getNumberOfStates();
 
         if (cached != null) {
             return cached;

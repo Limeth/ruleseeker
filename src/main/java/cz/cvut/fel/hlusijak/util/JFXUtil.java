@@ -94,7 +94,7 @@ public final class JFXUtil {
 
         Simulator simulator = simulatorSupplier.get();
 
-        simulator.getRuleSet().stateStream().forEach(comboBox.itemsProperty().get()::add);
+        simulator.getRuleSet().getType().stateStream().forEach(comboBox.itemsProperty().get()::add);
 
         return comboBox;
     }

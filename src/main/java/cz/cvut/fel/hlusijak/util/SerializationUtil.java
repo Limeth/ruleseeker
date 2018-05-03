@@ -13,8 +13,9 @@ import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
 import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSetType;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSetType;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
 import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
 import javafx.scene.paint.Color;
@@ -45,8 +46,9 @@ public final class SerializationUtil {
         kryo.register(SquareGridGeometry.class, typeIndex++);
         kryo.register(TriangleGridGeometry.class, typeIndex++);
         kryo.register(HexagonGridGeometry.class, typeIndex++);
-        kryo.register(EdgeSumRuleSet.class, typeIndex++);
-        kryo.register(VertexSumRuleSet.class, typeIndex++);
+        kryo.register(RuleSet.class, typeIndex++);
+        kryo.register(EdgeSumRuleSetType.class, typeIndex++);
+        kryo.register(VertexSumRuleSetType.class, typeIndex++);
         kryo.register(CustomStateColoringMethod.class, typeIndex++);
         kryo.register(HueStateColoringMethod.class, typeIndex++);
 

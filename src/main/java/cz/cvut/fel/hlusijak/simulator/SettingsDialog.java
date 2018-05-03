@@ -1,48 +1,49 @@
   package cz.cvut.fel.hlusijak.simulator;
 
-import com.google.common.base.Preconditions;
-import cz.cvut.fel.hlusijak.RuleSeeker;
-import cz.cvut.fel.hlusijak.simulator.grid.Grid;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSet;
-import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
-import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
-import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
-import cz.cvut.fel.hlusijak.util.JFXUtil;
-import cz.cvut.fel.hlusijak.util.Vector2i;
-import cz.cvut.fel.hlusijak.util.Wrapper;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.StrokeType;
-import javafx.scene.control.ButtonBar.ButtonData;
-import org.javatuples.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+  import com.google.common.base.Preconditions;
+  import cz.cvut.fel.hlusijak.RuleSeeker;
+  import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+  import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+  import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
+  import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
+  import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
+  import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSetType;
+  import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+  import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSetType;
+  import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSetType;
+  import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSetType;
+  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
+  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
+  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
+  import cz.cvut.fel.hlusijak.util.JFXUtil;
+  import cz.cvut.fel.hlusijak.util.Vector2i;
+  import cz.cvut.fel.hlusijak.util.Wrapper;
+  import javafx.fxml.FXML;
+  import javafx.fxml.FXMLLoader;
+  import javafx.fxml.Initializable;
+  import javafx.scene.Node;
+  import javafx.scene.control.*;
+  import javafx.scene.control.ButtonBar.ButtonData;
+  import javafx.scene.layout.GridPane;
+  import javafx.scene.layout.HBox;
+  import javafx.scene.paint.Color;
+  import javafx.scene.paint.Paint;
+  import javafx.scene.shape.Polygon;
+  import javafx.scene.shape.StrokeType;
+  import org.javatuples.Pair;
+  import org.slf4j.Logger;
+  import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+  import java.io.IOException;
+  import java.net.URL;
+  import java.util.Arrays;
+  import java.util.List;
+  import java.util.Random;
+  import java.util.ResourceBundle;
+  import java.util.function.Function;
+  import java.util.function.Supplier;
+  import java.util.stream.Collectors;
+  import java.util.stream.IntStream;
 
 public class SettingsDialog extends Alert implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
@@ -170,19 +171,19 @@ public class SettingsDialog extends Alert implements Initializable {
 
     private void initializeRuleSetTab() {
         ruleSetTypeChoiceBox.getItems().addAll(
-            new RuleSetItem(EdgeSumRuleSet.class, "Edge Combination (Von Neumann's generalized)", () -> {
-                return new EdgeSumRuleSet(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
+            new RuleSetItem(EdgeSumRuleSetType.class, "Edge Combination (Von Neumann's generalized)", () -> {
+                return new EdgeSumRuleSetType(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
             }),
-            new RuleSetItem(VertexSumRuleSet.class, "Vertex Combination (Moore's generalized)", () -> {
-                return new VertexSumRuleSet(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
+            new RuleSetItem(VertexSumRuleSetType.class, "Vertex Combination (Moore's generalized)", () -> {
+                return new VertexSumRuleSetType(simulator.getGrid().getGeometry(), (byte) (int) ruleSetCellStatesSpinner.getValue());
             })
         );
         ruleSetCellStatesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2, Integer.MAX_VALUE));
         JFXUtil.fixUnfocus(ruleSetCellStatesSpinner);
 
         // Assign defaults
-        Item.selectByClass(ruleSetTypeChoiceBox, simulator.getRuleSet().getClass());
-        ruleSetCellStatesSpinner.getValueFactory().setValue((int) simulator.getRuleSet().getNumberOfStates());
+        Item.selectByClass(ruleSetTypeChoiceBox, simulator.getRuleSet().getType().getClass());
+        ruleSetCellStatesSpinner.getValueFactory().setValue((int) simulator.getRuleSet().getType().getNumberOfStates());
         renderRuleView();
 
         // Listeners
@@ -335,7 +336,7 @@ public class SettingsDialog extends Alert implements Initializable {
 
     private void renderStateColorsPreview() {
         stateColorsPreviewHBox.getChildren().clear();
-        simulator.getRuleSet().stateStream().forEach(state -> {
+        simulator.getRuleSet().getType().stateStream().forEach(state -> {
             stateColorsPreviewHBox.getChildren().add(buildStateNode(state));
         });
     }
@@ -343,25 +344,28 @@ public class SettingsDialog extends Alert implements Initializable {
     private void updateRuleSet() {
         RuleSet previousRuleSet = simulator.getRuleSet();
         byte[] previousRules = previousRuleSet.getRules();
-        RuleSet nextRuleSet = ruleSetTypeChoiceBox.getValue().constructor.get();
+        RuleSetType nextRuleSetType = ruleSetTypeChoiceBox.getValue().constructor.get();
+        RuleSet nextRuleSet = new RuleSet(nextRuleSetType);
         byte[] nextRules = nextRuleSet.getRules();
 
         System.arraycopy(previousRules, 0, nextRules, 0, Math.min(previousRules.length, nextRules.length));
 
+        nextRuleSet.setRules(nextRules);
         simulator.setRuleSet(nextRuleSet);
         renderRuleView();
     }
 
     private void renderRuleView() {
-        SumRuleSet<?> ruleSet = (SumRuleSet) simulator.getRuleSet();
-        int neighbourhoodSize = ruleSet.getNeighbourhoodSize();
+        RuleSet ruleSet = simulator.getRuleSet();
+        SumRuleSetType<?> ruleSetType = (SumRuleSetType) ruleSet.getType();
+        int neighbourhoodSize = ruleSetType.getNeighbourhoodSize();
         final GridPane grid = new GridPane();
 
         JFXUtil.applyGridPaneStyle(grid, false);
         grid.add(new Label("Previous"), 0, 0);
         grid.add(new Label("Neighbours"), 1, 0, neighbourhoodSize, 1);
         grid.add(new Label("Next"), neighbourhoodSize + 1, 0);
-        ruleSet.enumerateRules()
+        ruleSetType.enumerateRules(ruleSet)
             .forEach(rule -> {
                 Node[] row = new Node[neighbourhoodSize + 2];
                 row[0] = buildStateNode(rule.getPreviousState());
@@ -379,7 +383,7 @@ public class SettingsDialog extends Alert implements Initializable {
 
                 ComboBox<Byte> nextStateComboBox = new ComboBox<>();
 
-                ruleSet.stateStream().forEach(nextStateComboBox.getItems()::add);
+                ruleSet.getType().stateStream().forEach(nextStateComboBox.getItems()::add);
 
                 ComboBox<Byte> stateComboBox = JFXUtil.buildStateComboBox(null, () -> simulator);
 
@@ -492,7 +496,7 @@ public class SettingsDialog extends Alert implements Initializable {
         }
     }
 
-    private static class RuleSetItem<T extends RuleSet> extends Item<Class<T>> {
+    private static class RuleSetItem<T extends RuleSetType> extends Item<Class<T>> {
         final Supplier<T> constructor;
 
         private RuleSetItem(Class<T> value, String displayName, Supplier<T> constructor) {

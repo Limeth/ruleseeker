@@ -168,6 +168,6 @@ public class Simulator {
 
     @Override
     public Simulator clone() {
-        return new Simulator(grid.clone(), ruleSet.copy(), stateColoringMethod != null ? stateColoringMethod.copy() : null, cellsPerTask);
+        return new Simulator(grid.clone(), ruleSet.clone(), stateColoringMethod != null ? stateColoringMethod.copy() : null, cellsPerTask);
     }
 }
