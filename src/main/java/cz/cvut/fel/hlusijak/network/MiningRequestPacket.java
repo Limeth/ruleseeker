@@ -1,27 +1,37 @@
 package cz.cvut.fel.hlusijak.network;
 
-import java.util.Optional;
-
 import cz.cvut.fel.hlusijak.simulator.Simulator;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
 
 public class MiningRequestPacket implements Packet {
-    private final Simulator seed;
+    private final RuleSet originalRuleSet;
+    private final GridGeometry gridGeometry;
     private final int minIterations;
     private final int maxIterations;
 
-    public MiningRequestPacket(Simulator seed, int minIterations, int maxIterations) {
-        this.seed = seed;
+    public MiningRequestPacket(RuleSet originalRuleSet, GridGeometry gridGeometry, int minIterations, int maxIterations) {
+        this.originalRuleSet = originalRuleSet;
+        this.gridGeometry = gridGeometry;
         this.minIterations = minIterations;
         this.maxIterations = maxIterations;
     }
 
-    // Kryonet requires a default constructor for registered classes
-    private MiningRequestPacket() {
-        this(null, 0, 0);
+    public MiningRequestPacket(Simulator seed, int minIterations, int maxIterations) {
+        this(seed.getRuleSet(), seed.getGrid().getGeometry(), minIterations, maxIterations);
     }
 
-    public Simulator getSeed() {
-        return seed;
+    // Kryonet requires a default constructor for registered classes
+    private MiningRequestPacket() {
+        this(null, null, 0, 0);
+    }
+
+    public RuleSet getOriginalRuleSet() {
+        return originalRuleSet;
+    }
+
+    public GridGeometry getGridGeometry() {
+        return gridGeometry;
     }
 
     public int getMinIterations() {
@@ -35,8 +45,9 @@ public class MiningRequestPacket implements Packet {
     @Override
     public String toString() {
         return "MiningRequestPacket{" +
-                "seed='" + seed +
-                "', minIterations=" + minIterations +
+                ", originalRuleSet=" + originalRuleSet +
+                ", gridGeometry=" + gridGeometry +
+                ", minIterations=" + minIterations +
                 ", maxIterations=" + maxIterations +
                 '}';
     }

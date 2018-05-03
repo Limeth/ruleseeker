@@ -27,6 +27,10 @@ public class Simulator {
         this.cellsPerTask = cellsPerTask;
     }
 
+    public Simulator(Grid grid, RuleSet ruleSet, StateColoringMethod stateColoringMethod) {
+        this(grid, ruleSet, stateColoringMethod, 32);
+    }
+
     private Simulator() {
         // Required by Kryo
     }
@@ -164,6 +168,6 @@ public class Simulator {
 
     @Override
     public Simulator clone() {
-        return new Simulator(grid.clone(), ruleSet.copy(), stateColoringMethod.copy(), cellsPerTask);
+        return new Simulator(grid.clone(), ruleSet.copy(), stateColoringMethod != null ? stateColoringMethod.copy() : null, cellsPerTask);
     }
 }

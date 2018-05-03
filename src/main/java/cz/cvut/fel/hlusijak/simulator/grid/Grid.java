@@ -68,6 +68,19 @@ public class Grid {
         Arrays.fill(this.states, state);
     }
 
+    public byte[] getTileStateChunk(int offset, int maxLength) {
+        int length = Math.max(0, Math.min(states.length - offset, maxLength));
+        byte[] result = new byte[length];
+
+        if (length <= 0) {
+            return result;
+        }
+
+        System.arraycopy(states, offset, result, 0, length);
+
+        return result;
+    }
+
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Grid clone() {

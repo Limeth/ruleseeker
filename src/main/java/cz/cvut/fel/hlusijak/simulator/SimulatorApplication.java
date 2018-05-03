@@ -61,7 +61,7 @@ public class SimulatorApplication extends Application {
         grid.randomizeTileStates(rng, ruleSet);
 
         StateColoringMethod stateColoringMethod = HueStateColoringMethod.random();
-        Simulator simulator = new Simulator(grid, ruleSet, stateColoringMethod, 10);
+        Simulator simulator = new Simulator(grid, ruleSet, stateColoringMethod);
 
         RuleSeeker.getInstance().setSimulator(simulator);
     }

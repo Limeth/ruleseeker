@@ -4,13 +4,10 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import com.esotericsoftware.minlog.Log;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-
 import cz.cvut.fel.hlusijak.command.CommandMaster;
 import cz.cvut.fel.hlusijak.network.ConnectionRequestPacket;
 import cz.cvut.fel.hlusijak.network.ConnectionResultPacket;
@@ -18,9 +15,9 @@ import cz.cvut.fel.hlusijak.network.MiningRequestPacket;
 import cz.cvut.fel.hlusijak.network.MiningResultPacket;
 import cz.cvut.fel.hlusijak.network.Network;
 import cz.cvut.fel.hlusijak.network.Packet;
+import cz.cvut.fel.hlusijak.network.SeedGridChunkPacket;
 import cz.cvut.fel.hlusijak.simulator.Simulator;
-import cz.cvut.fel.hlusijak.util.SerializationUtil;
-
+import cz.cvut.fel.hlusijak.simulator.grid.Grid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +25,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Set;
 
 public class Master extends Listener implements Runnable {
+    private static int GRID_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(Master.class);
     private final CommandMaster options;
     private Server server;
@@ -46,8 +43,7 @@ public class Master extends Listener implements Runnable {
     }
 
     public void run() {
-        // TODO: might want to raise this to allow larger grids
-        server = new Server(8192, 8192);
+        server = new Server(Network.BUFFER_SIZE, Network.BUFFER_SIZE);
 
         Network.register(server);
         validateOptions(); // We use the servers Kryo instance
@@ -112,6 +108,25 @@ public class Master extends Listener implements Runnable {
         }
     }
 
+    private void requestMining(Connection connection) {
+        connection.sendTCP(new MiningRequestPacket(seed, 50, 200));
+
+        Grid grid = seed.getGrid();
+        int chunkOffset = 0;
+
+        while (true) {
+            byte[] chunk = grid.getTileStateChunk(chunkOffset, GRID_CHUNK_MAX_LENGTH);
+
+            if (chunk.length <= 0) {
+                break;
+            }
+
+            connection.sendTCP(new SeedGridChunkPacket(chunk, chunkOffset));
+
+            chunkOffset += GRID_CHUNK_MAX_LENGTH;
+        }
+    }
+
     @Override
     public void received(Connection connection, Object packet) {
         if (!(packet instanceof Packet)) {
@@ -155,7 +170,7 @@ public class Master extends Listener implements Runnable {
             if (close) {
                 connection.close();
             } else {
-                connection.sendTCP(new MiningRequestPacket(seed, 50, 200));
+                requestMining(connection);
             }
         } else {
             LOGGER.info("Received unexpected packet from {}, closing connection",

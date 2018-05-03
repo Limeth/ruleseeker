@@ -56,8 +56,6 @@ public class Miner {
             Grid previousGrid = iterationResult.getPreviousGrid();
             Grid nextGrid = iterationResult.getNextGrid();
 
-                LOGGER.info("Iter #" + iterations);
-
             if (previousGrid.equals(nextGrid) || iterations > maxIterations) {
                 LOGGER.info("Iter #" + iterations);
 
