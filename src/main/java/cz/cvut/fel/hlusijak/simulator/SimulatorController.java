@@ -86,13 +86,13 @@ public class SimulatorController implements Initializable {
 
     private void initializeView() {
         viewPane.layoutBoundsProperty()
-                .addListener(observable -> updateViewPane(null));
+                .addListener(observable -> updateViewPane(null, false));
 
         // Workaround for the previous listener not being triggered in the first frame
         Wrapper<InvalidationListener> firstRenderListener = new Wrapper<>(null);
         firstRenderListener.value = observable -> {
             observable.removeListener(firstRenderListener.value);
-            updateViewPane(null);
+            updateViewPane(null, true);
         };
         viewPane.heightProperty().addListener(firstRenderListener.value);
 
@@ -134,7 +134,7 @@ public class SimulatorController implements Initializable {
             }
 
             RuleSeeker.getInstance().setSimulator(simulator);
-            updateViewPane(null);
+            updateViewPane(null, true);
             initializeEditModeComboBox();
         });
         saveButton.setOnAction(event -> {
@@ -177,7 +177,7 @@ public class SimulatorController implements Initializable {
 
             RuleSeeker.getInstance().setSimulator(simulator);
             initializeEditModeComboBox();
-            updateViewPane(null);
+            updateViewPane(null, true);
         });
     }
 
@@ -202,7 +202,7 @@ public class SimulatorController implements Initializable {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
             simulator.nextIteration().thenAcceptAsync(iterationResult ->
-                updateViewPane(iterationResult.getNextGrid()), FutureUtil.getJFXExecutor());
+                updateViewPane(iterationResult.getNextGrid(), false), FutureUtil.getJFXExecutor());
         });
 
         pauseButton.setOnAction(event -> {
@@ -273,7 +273,7 @@ public class SimulatorController implements Initializable {
                 simulator.getGrid().randomizeTileStates(new Random(), simulator.getRuleSet());
             }
 
-            updateViewPane(null);
+            updateViewPane(null, false);
         });
     }
 
@@ -283,7 +283,7 @@ public class SimulatorController implements Initializable {
     }
 
     private CompletableFuture<Boolean> onIterationComplete(IterationResult iterationResult) {
-        return FutureUtil.futureTaskJFX(() -> updateViewPane(iterationResult.getNextGrid()))
+        return FutureUtil.futureTaskJFX(() -> updateViewPane(iterationResult.getNextGrid(), false))
             .thenApplyAsync(v -> {
                 while (true) {
                     boolean loadedResumed;
@@ -337,7 +337,7 @@ public class SimulatorController implements Initializable {
         return Pair.with(scale, offset);
     }
 
-    public void updateViewPane(Grid grid) {
+    public void updateViewPane(Grid grid, boolean gridShapeChanged) {
         final Grid finalGrid;
 
         if (grid == null) {
@@ -352,18 +352,29 @@ public class SimulatorController implements Initializable {
         double scale = transformation.getValue0();
         Vector2d offset = transformation.getValue1();
 
-        viewPane.getChildren().clear();
+        if (gridShapeChanged) {
+            viewPane.getChildren().clear();
 
-        this.cellShapes = gridGeometry.tileIndexStream().boxed().map(tileIndex -> {
-            byte state = finalGrid.getTileState(tileIndex);
-            CellShape cellShape = new CellShape(this, tileIndex, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
-                    .map(vertex -> vertex.mul(scale))
-                    .map(offset::add).toArray(Vector2d[]::new));
+            this.cellShapes = gridGeometry.tileIndexStream().boxed().map(tileIndex -> {
+                byte state = finalGrid.getTileState(tileIndex);
+                CellShape cellShape = new CellShape(this, tileIndex, state, Arrays.stream(gridGeometry.getTileVertices(tileIndex))
+                        .map(vertex -> vertex.mul(scale))
+                        .map(offset::add).toArray(Vector2d[]::new));
 
-            viewPane.getChildren().add(cellShape);
+                viewPane.getChildren().add(cellShape);
 
-            return cellShape;
-        }).toArray(CellShape[]::new);
+                return cellShape;
+            }).toArray(CellShape[]::new);
+        } else if (this.cellShapes != null) {
+            for (int i = 0; i < this.cellShapes.length; i++) {
+                CellShape cellShape = this.cellShapes[i];
+
+                cellShape.updateShape(Arrays.stream(gridGeometry.getTileVertices(i))
+                        .map(vertex -> vertex.mul(scale))
+                        .map(offset::add).toArray(Vector2d[]::new));
+                cellShape.updateColor();
+            }
+        }
     }
 
     public byte getSelectedState() {

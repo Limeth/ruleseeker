@@ -46,6 +46,14 @@ public class CellShape extends Polygon {
         updateColor(state);
     }
 
+    public void updateShape(Vector2d... vertices) {
+        getPoints().clear();
+
+        for (Vector2d vertex : vertices) {
+            getPoints().addAll(vertex.getX(), vertex.getY());
+        }
+    }
+
     public void updateColor(byte state) {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
