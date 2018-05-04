@@ -104,8 +104,20 @@ public class RuleSet {
         System.arraycopy(rules, 0, this.rules, 0, rules.length);
     }
 
+    public void setRule(int index, byte outcome) {
+        rules[index] = outcome;
+    }
+
     @Override
     public RuleSet clone() {
         return new RuleSet(type.copy(), rules);
+    }
+
+    @Override
+    public String toString() {
+        return "RuleSet{" +
+                "type=" + type +
+                ", rules=" + Arrays.toString(rules) +
+                '}';
     }
 }

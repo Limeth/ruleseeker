@@ -23,10 +23,10 @@
             <Button fx:id="settingsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Settings" />
         </items>
       </ToolBar>
-      <SplitPane dividerPositions="0.6" prefHeight="480.0" prefWidth="640.0" VBox.vgrow="ALWAYS">
+      <SplitPane dividerPositions="0.6" maxWidth="1.7976931348623157E308" prefHeight="480.0" prefWidth="640.0" VBox.vgrow="ALWAYS">
          <items>
             <Pane fx:id="viewPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
-            <VBox spacing="24.0">
+            <VBox maxWidth="1.7976931348623157E308" spacing="24.0">
                <children>
                   <HBox alignment="TOP_CENTER" spacing="12.0">
                      <children>

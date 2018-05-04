@@ -351,6 +351,9 @@ public class SettingsDialog extends Alert implements Initializable {
         System.arraycopy(previousRules, 0, nextRules, 0, Math.min(previousRules.length, nextRules.length));
 
         nextRuleSet.setRules(nextRules);
+
+        System.out.println(nextRuleSet);
+
         simulator.setRuleSet(nextRuleSet);
         renderRuleView();
     }
@@ -389,7 +392,7 @@ public class SettingsDialog extends Alert implements Initializable {
 
                 stateComboBox.getSelectionModel().select(rule.getNextState());
                 stateComboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-                    ruleSet.getRules()[rule.getIndex()] = newValue.byteValue();
+                    ruleSet.setRule(rule.getIndex(), newValue.byteValue());
                 });
 
                 row[row.length - 1] = stateComboBox;
@@ -443,12 +446,13 @@ public class SettingsDialog extends Alert implements Initializable {
         boolean gridAltered = !chosenGridGeometryItem.value.isAssignableFrom(gridGeometry.getClass())
             || !chosenGridDimensions.equals(gridGeometry.getDimensions());
 
+        updateRuleSet();
+
         if (gridAltered) {
             gridGeometry = chosenGridGeometryItem.constructor.apply(chosenGridDimensions);
             grid = new Grid(gridGeometry);
 
             this.simulator.setGrid(grid);
-            updateRuleSet();
         }
     }
 
