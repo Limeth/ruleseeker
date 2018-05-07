@@ -27,4 +27,14 @@ public class EdgeSumRuleSetType extends SumRuleSetType<GridGeometry> {
     public EdgeSumRuleSetType copy() {
         return new EdgeSumRuleSetType(gridGeometry, states);
     }
+
+    @Override
+    public String toString() {
+        return "EdgeSumRuleSetType{" +
+                "gridGeometry=" + gridGeometry +
+                ", states=" + states +
+                ", neighbouringStateCombinations=" + neighbouringStateCombinations +
+                ", ruleSetSize=" + ruleSetSize +
+                '}';
+    }
 }

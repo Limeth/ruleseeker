@@ -349,11 +349,7 @@ public class SettingsDialog extends Alert implements Initializable {
         byte[] nextRules = nextRuleSet.getRules();
 
         System.arraycopy(previousRules, 0, nextRules, 0, Math.min(previousRules.length, nextRules.length));
-
         nextRuleSet.setRules(nextRules);
-
-        System.out.println(nextRuleSet);
-
         simulator.setRuleSet(nextRuleSet);
         renderRuleView();
     }
@@ -446,14 +442,14 @@ public class SettingsDialog extends Alert implements Initializable {
         boolean gridAltered = !chosenGridGeometryItem.value.isAssignableFrom(gridGeometry.getClass())
             || !chosenGridDimensions.equals(gridGeometry.getDimensions());
 
-        updateRuleSet();
-
         if (gridAltered) {
             gridGeometry = chosenGridGeometryItem.constructor.apply(chosenGridDimensions);
             grid = new Grid(gridGeometry);
 
             this.simulator.setGrid(grid);
         }
+
+        updateRuleSet();
     }
 
     private static class Item<T> {

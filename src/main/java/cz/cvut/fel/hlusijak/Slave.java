@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class Slave extends Listener implements Runnable {
     private static int RULE_SET_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
@@ -112,7 +111,7 @@ public class Slave extends Listener implements Runnable {
         if (packet instanceof MiningRequestPacket) {
             MiningRequestPacket mrp = (MiningRequestPacket) packet;
 
-            this.seed = new Simulator(new Grid(mrp.getGridGeometry()), new RuleSet(mrp.getRuleSetType()), null);
+            this.seed = new Simulator(new Grid(mrp.getRuleSetType().getGridGeometry()), new RuleSet(mrp.getRuleSetType()), null);
             this.minIterations = mrp.getMinIterations();
             this.maxIterations = mrp.getMaxIterations();
         } else if (packet instanceof SeedGridChunkPacket) {

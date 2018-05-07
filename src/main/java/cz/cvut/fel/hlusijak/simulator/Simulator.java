@@ -36,11 +36,20 @@ public class Simulator {
     }
 
     private CompletableFuture<Integer> recursiveFuture(Function<IterationResult, CompletableFuture<Boolean>> onIterationComplete) {
-        return nextIterationAsync().thenCompose(onIterationComplete).thenCompose(cont -> {
-            if (cont) {
-                return recursiveFuture(onIterationComplete);
+        return nextIterationAsync().exceptionally(exception -> {
+            exception.printStackTrace();
+            return null;
+        }).thenCompose(iterationResult -> {
+            if (iterationResult != null) {
+                return onIterationComplete.apply(iterationResult).thenCompose(cont -> {
+                    if (cont) {
+                        return recursiveFuture(onIterationComplete);
+                    } else {
+                        return CompletableFuture.completedFuture(iteration);
+                    }
+                });
             } else {
-                return CompletableFuture.completedFuture(iteration);
+                return CompletableFuture.completedFuture(iteration - 1);
             }
         });
     }
@@ -49,7 +58,7 @@ public class Simulator {
         return FutureUtil.futureTaskBackground(v -> recursiveFuture(onIterationComplete));
     }
 
-    private CompletableFuture<IterationResult> nextIterationAsync() {
+    public synchronized CompletableFuture<IterationResult> nextIterationAsync() {
         final Instant computationStart = Instant.now();
         final Grid previousGrid = grid.clone();
         final RuleSet currentRuleSet = ruleSet;
@@ -126,8 +135,12 @@ public class Simulator {
         }, FutureUtil.getBackgroundExecutor());
     }
 
-    public synchronized CompletableFuture<IterationResult> nextIteration() {
-        return nextIterationAsync();
+    public synchronized IterationResult nextIteration() {
+        try {
+            return nextIterationAsync().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public synchronized Grid getGrid() {

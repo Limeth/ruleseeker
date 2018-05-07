@@ -201,7 +201,7 @@ public class SimulatorController implements Initializable {
         stepButton.setOnAction(event -> {
             Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
-            simulator.nextIteration().thenAcceptAsync(iterationResult ->
+            simulator.nextIterationAsync().thenAcceptAsync(iterationResult ->
                 updateViewPane(iterationResult.getNextGrid(), false), FutureUtil.getJFXExecutor());
         });
 

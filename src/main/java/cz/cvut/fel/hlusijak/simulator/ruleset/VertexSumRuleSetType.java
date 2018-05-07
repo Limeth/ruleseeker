@@ -27,4 +27,14 @@ public class VertexSumRuleSetType extends SumRuleSetType<GridGeometry> {
     public VertexSumRuleSetType copy() {
         return new VertexSumRuleSetType(gridGeometry, states);
     }
+
+    @Override
+    public String toString() {
+        return "VertexSumRuleSetType{" +
+                "gridGeometry=" + gridGeometry +
+                ", states=" + states +
+                ", neighbouringStateCombinations=" + neighbouringStateCombinations +
+                ", ruleSetSize=" + ruleSetSize +
+                '}';
+    }
 }
