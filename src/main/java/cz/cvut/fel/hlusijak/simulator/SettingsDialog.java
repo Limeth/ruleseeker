@@ -21,6 +21,9 @@
   import javafx.fxml.FXML;
   import javafx.fxml.FXMLLoader;
   import javafx.fxml.Initializable;
+  import javafx.geometry.HPos;
+  import javafx.geometry.Insets;
+  import javafx.geometry.Pos;
   import javafx.scene.Node;
   import javafx.scene.control.*;
   import javafx.scene.control.ButtonBar.ButtonData;
@@ -354,6 +357,14 @@ public class SettingsDialog extends Alert implements Initializable {
         renderRuleView();
     }
 
+    public static final Vector2i SPACING = Vector2i.of(16, 12);
+
+    private Node styleCell(Node node, boolean middle, boolean firstRow) {
+        GridPane.setMargin(node, new Insets(0, middle ? SPACING.getX() : 0, firstRow ? SPACING.getY() : 0, middle ? SPACING.getX() : 0));
+        GridPane.setHalignment(node, HPos.CENTER);
+        return node;
+    }
+
     private void renderRuleView() {
         RuleSet ruleSet = simulator.getRuleSet();
         SumRuleSetType<?> ruleSetType = (SumRuleSetType) ruleSet.getType();
@@ -361,13 +372,19 @@ public class SettingsDialog extends Alert implements Initializable {
         final GridPane grid = new GridPane();
 
         JFXUtil.applyGridPaneStyle(grid, false);
-        grid.add(new Label("Previous"), 0, 0);
-        grid.add(new Label("Neighbours"), 1, 0, neighbourhoodSize, 1);
-        grid.add(new Label("Next"), neighbourhoodSize + 1, 0);
+        grid.setAlignment(Pos.TOP_CENTER);
+        //grid.getColumnConstraints().forEach(columnConstraints -> columnConstraints.setHalignment(HPos.CENTER));
+        grid.add(styleCell(new Label("Previous"), false, true), 0, 0);
+        grid.add(styleCell(new Label("Neighbours"), true, true), 1, 0);
+        grid.add(styleCell(new Label("Next"), false, true), 2, 0);
         ruleSetType.enumerateRules(ruleSet)
             .forEach(rule -> {
-                Node[] row = new Node[neighbourhoodSize + 2];
-                row[0] = buildStateNode(rule.getPreviousState());
+                Node[] row = new Node[3];
+                // First column
+                row[0] = styleCell(buildStateNode(rule.getPreviousState()), false, false);
+
+                // Neighbourhood
+                HBox neighbourhoodBox = new HBox();
                 int[] stateCount = rule.getStateCount();
                 byte state = 0;
 
@@ -376,10 +393,13 @@ public class SettingsDialog extends Alert implements Initializable {
                         state++;
                     }
 
-                    row[neighbourIndex + 1] = buildStateNode(state);
+                    neighbourhoodBox.getChildren().add(buildStateNode(state));
                     stateCount[state]--;
                 }
 
+                row[1] = styleCell(neighbourhoodBox, true, false);
+
+                // Last column
                 ComboBox<Byte> nextStateComboBox = new ComboBox<>();
 
                 ruleSet.getType().stateStream().forEach(nextStateComboBox.getItems()::add);
@@ -391,7 +411,7 @@ public class SettingsDialog extends Alert implements Initializable {
                     ruleSet.setRule(rule.getIndex(), newValue.byteValue());
                 });
 
-                row[row.length - 1] = stateComboBox;
+                row[2] = styleCell(stateComboBox, false, false);
 
                 grid.addRow(rule.getIndex() + 1, row);
             });
