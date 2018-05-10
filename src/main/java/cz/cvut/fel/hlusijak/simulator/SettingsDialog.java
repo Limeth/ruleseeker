@@ -29,6 +29,7 @@
   import javafx.scene.control.ButtonBar.ButtonData;
   import javafx.scene.layout.GridPane;
   import javafx.scene.layout.HBox;
+  import javafx.scene.layout.Priority;
   import javafx.scene.paint.Color;
   import javafx.scene.paint.Paint;
   import javafx.scene.shape.Polygon;
@@ -238,6 +239,11 @@ public class SettingsDialog extends Alert implements Initializable {
                     GridPane root = new GridPane();
                     Slider hueOffsetSlider = new Slider(0, 1, method.getHueOffset());
 
+                    root.setMaxWidth(Double.MAX_VALUE);
+                    root.setAlignment(Pos.TOP_CENTER);
+                    hueOffsetSlider.setMaxWidth(Double.MAX_VALUE);
+                    GridPane.setFillWidth(hueOffsetSlider, true);
+                    GridPane.setHgrow(hueOffsetSlider, Priority.ALWAYS);
                     JFXUtil.applyGridPaneStyle(root, true);
                     root.addRow(0, new Label("Hue offset"), hueOffsetSlider);
 
@@ -272,6 +278,7 @@ public class SettingsDialog extends Alert implements Initializable {
                     }).collect(Collectors.toList());
 
                     JFXUtil.applyGridPaneStyle(root, true);
+                    root.setAlignment(Pos.TOP_CENTER);
                     IntStream.range(0, colors.size()).forEach(colorIndex -> {
                         ColorPicker colorPicker = new ColorPicker();
 
@@ -287,6 +294,12 @@ public class SettingsDialog extends Alert implements Initializable {
 
                     Button addButton = new Button("Add");
                     Button removeButton = new Button("Remove");
+
+                    addButton.setMaxWidth(Double.MAX_VALUE);
+                    removeButton.setMaxWidth(Double.MAX_VALUE);
+
+                    GridPane.setFillWidth(addButton, true);
+                    GridPane.setFillWidth(removeButton, true);
 
                     addButton.setOnAction(event -> {
                         method.addColor(Color.WHITE);
@@ -333,6 +346,7 @@ public class SettingsDialog extends Alert implements Initializable {
         ColoringMethodItem<StateColoringMethod> item = /* topkek */ (ColoringMethodItem<StateColoringMethod>) (Object) Item.selectByClass(stateColorsMethodChoiceBox, currentStateColoringMethod.getClass());
         Node root = item.buildControls(currentStateColoringMethod);
 
+        stateColorsScrollPane.setFitToWidth(true);
         stateColorsScrollPane.setContent(root);
         renderStateColorsPreview();
     }
@@ -373,7 +387,6 @@ public class SettingsDialog extends Alert implements Initializable {
 
         JFXUtil.applyGridPaneStyle(grid, false);
         grid.setAlignment(Pos.TOP_CENTER);
-        //grid.getColumnConstraints().forEach(columnConstraints -> columnConstraints.setHalignment(HPos.CENTER));
         grid.add(styleCell(new Label("Previous"), false, true), 0, 0);
         grid.add(styleCell(new Label("Neighbours"), true, true), 1, 0);
         grid.add(styleCell(new Label("Next"), false, true), 2, 0);
