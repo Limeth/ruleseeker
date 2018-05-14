@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ * A JavaFX application to visualise the progress of a simulation.
+ */
 public class SimulatorApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorApplication.class);
     private static boolean JFX_INITIALIZED = false;
@@ -66,6 +69,9 @@ public class SimulatorApplication extends Application {
         RuleSeeker.getInstance().setSimulator(simulator);
     }
 
+    /**
+     * @return Whether {@link SimulatorApplication} has been instantiated and initialized.
+     */
     public static boolean isJFXInitialized() {
         return JFX_INITIALIZED;
     }

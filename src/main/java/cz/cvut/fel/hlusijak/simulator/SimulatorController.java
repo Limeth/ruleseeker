@@ -41,6 +41,9 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * A JavaFX controller for the {@link SimulatorApplication}.
+ */
 public class SimulatorController implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorController.class);
 
@@ -71,7 +74,6 @@ public class SimulatorController implements Initializable {
     private double intervalSeconds = 1.0;
 
     private CellShape[] cellShapes;
-    private boolean mouseHeld = false;
 
     public SimulatorController(Stage stage) {
         this.stage = stage;
@@ -95,9 +97,6 @@ public class SimulatorController implements Initializable {
             updateViewPane(null, true);
         };
         viewPane.heightProperty().addListener(firstRenderListener.value);
-
-        viewPane.setOnMousePressed(event -> mouseHeld = true);
-        viewPane.setOnMouseReleased(event -> mouseHeld = false);
     }
 
     private void initializeToolbar() {
@@ -337,7 +336,7 @@ public class SimulatorController implements Initializable {
         return Pair.with(scale, offset);
     }
 
-    public void updateViewPane(Grid grid, boolean gridShapeChanged) {
+    private void updateViewPane(Grid grid, boolean gridShapeChanged) {
         final Grid finalGrid;
 
         if (grid == null) {
@@ -377,11 +376,10 @@ public class SimulatorController implements Initializable {
         }
     }
 
+    /**
+     * @return Currently selected state in the edit mode combo box.
+     */
     public byte getSelectedState() {
         return editModeComboBox.getValue();
-    }
-
-    public boolean isMouseHeld() {
-        return mouseHeld;
     }
 }

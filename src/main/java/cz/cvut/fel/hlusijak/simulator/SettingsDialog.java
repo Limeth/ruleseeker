@@ -1,56 +1,61 @@
-  package cz.cvut.fel.hlusijak.simulator;
+package cz.cvut.fel.hlusijak.simulator;
 
-  import com.google.common.base.Preconditions;
-  import cz.cvut.fel.hlusijak.RuleSeeker;
-  import cz.cvut.fel.hlusijak.simulator.grid.Grid;
-  import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
-  import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
-  import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
-  import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
-  import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSetType;
-  import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
-  import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSetType;
-  import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSetType;
-  import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSetType;
-  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
-  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
-  import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
-  import cz.cvut.fel.hlusijak.util.JFXUtil;
-  import cz.cvut.fel.hlusijak.util.Vector2i;
-  import cz.cvut.fel.hlusijak.util.Wrapper;
-  import javafx.fxml.FXML;
-  import javafx.fxml.FXMLLoader;
-  import javafx.fxml.Initializable;
-  import javafx.geometry.HPos;
-  import javafx.geometry.Insets;
-  import javafx.geometry.Pos;
-  import javafx.scene.Node;
-  import javafx.scene.control.*;
-  import javafx.scene.control.ButtonBar.ButtonData;
-  import javafx.scene.layout.GridPane;
-  import javafx.scene.layout.HBox;
-  import javafx.scene.layout.Priority;
-  import javafx.scene.paint.Color;
-  import javafx.scene.paint.Paint;
-  import javafx.scene.shape.Polygon;
-  import javafx.scene.shape.StrokeType;
-  import org.javatuples.Pair;
-  import org.slf4j.Logger;
-  import org.slf4j.LoggerFactory;
+import com.google.common.base.Preconditions;
+import cz.cvut.fel.hlusijak.RuleSeeker;
+import cz.cvut.fel.hlusijak.simulator.grid.Grid;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.HexagonGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.SquareGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.grid.geometry.TriangleGridGeometry;
+import cz.cvut.fel.hlusijak.simulator.ruleset.EdgeSumRuleSetType;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSet;
+import cz.cvut.fel.hlusijak.simulator.ruleset.RuleSetType;
+import cz.cvut.fel.hlusijak.simulator.ruleset.SumRuleSetType;
+import cz.cvut.fel.hlusijak.simulator.ruleset.VertexSumRuleSetType;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.CustomStateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.HueStateColoringMethod;
+import cz.cvut.fel.hlusijak.simulator.stateColoringMethod.StateColoringMethod;
+import cz.cvut.fel.hlusijak.util.JFXUtil;
+import cz.cvut.fel.hlusijak.util.Vector2i;
+import cz.cvut.fel.hlusijak.util.Wrapper;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.StrokeType;
+import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  import java.io.IOException;
-  import java.net.URL;
-  import java.util.Arrays;
-  import java.util.List;
-  import java.util.Random;
-  import java.util.ResourceBundle;
-  import java.util.function.Function;
-  import java.util.function.Supplier;
-  import java.util.stream.Collectors;
-  import java.util.stream.IntStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+/**
+ * The settings dialog provides a way to change the properties of the simulation.
+ * There are utilities to adjust the grid shape and size, the rule set and the way cells are colored.
+ */
 public class SettingsDialog extends Alert implements Initializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
+    private static final Vector2i SPACING = Vector2i.of(16, 12);
     private final Simulator simulator;
 
     @FXML private TabPane tabPane;
@@ -88,6 +93,11 @@ public class SettingsDialog extends Alert implements Initializable {
         this.simulator = simulator;
     }
 
+    /**
+     * Opens the settings dialog, blocking access to the underlying stage.
+     *
+     * @return An edited simulator to replace the previous one with
+     */
     public static Simulator open() {
         Simulator previousSimulator = RuleSeeker.getInstance().getSimulator();
 
@@ -370,8 +380,6 @@ public class SettingsDialog extends Alert implements Initializable {
         simulator.setRuleSet(nextRuleSet);
         renderRuleView();
     }
-
-    public static final Vector2i SPACING = Vector2i.of(16, 12);
 
     private Node styleCell(Node node, boolean middle, boolean firstRow) {
         GridPane.setMargin(node, new Insets(0, middle ? SPACING.getX() : 0, firstRow ? SPACING.getY() : 0, middle ? SPACING.getX() : 0));
