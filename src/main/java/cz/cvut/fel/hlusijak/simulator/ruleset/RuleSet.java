@@ -7,6 +7,10 @@ import cz.cvut.fel.hlusijak.util.VariedUtil;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * This class contains the rules used to determine the next state of each grid
+ * cell in the following iteration.
+ */
 public class RuleSet {
     private final RuleSetType type;
     private final byte[] rules;
@@ -81,17 +85,11 @@ public class RuleSet {
         return Arrays.copyOf(rules, rules.length);
     }
 
+    /**
+     * @return A slice of the rule set array at the given {@param offset} with the maximum length of {@param maxLength}.
+     */
     public byte[] getRuleSetChunk(int offset, int maxLength) {
-        int length = Math.max(0, Math.min(rules.length - offset, maxLength));
-        byte[] result = new byte[length];
-
-        if (length <= 0) {
-            return result;
-        }
-
-        System.arraycopy(rules, offset, result, 0, length);
-
-        return result;
+        return VariedUtil.byteSlice(rules, offset, maxLength);
     }
 
     /**

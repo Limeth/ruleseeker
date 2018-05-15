@@ -1,5 +1,9 @@
 package cz.cvut.fel.hlusijak.simulator.ruleset;
 
+/**
+ * Provides a more meaningful interface to the data when iterating through all
+ * the states of a {@link RuleSet} of type {@link SumRuleSetType}.
+ */
 public class SumRuleRecord {
     private final int index;
     private final byte previousState;

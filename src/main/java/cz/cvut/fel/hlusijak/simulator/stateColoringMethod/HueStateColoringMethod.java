@@ -9,10 +9,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Assigns white color to the state #0 and saturated colors with evenly spaced
+ * hue to the rest of the states.
+ */
 public class HueStateColoringMethod implements StateColoringMethod {
     private List<Paint> cached;
     private double hueOffset;
 
+    /**
+     * @param hueOffset The hue offset of state #1, in range <0; 1).
+     */
     public HueStateColoringMethod(double hueOffset) {
         this.hueOffset = hueOffset % 1.0;
     }
@@ -21,6 +28,9 @@ public class HueStateColoringMethod implements StateColoringMethod {
         // Required by Kryo
     }
 
+    /**
+     * @return A {@link HueStateColoringMethod} with a random hue offset.
+     */
     public static HueStateColoringMethod random() {
         return new HueStateColoringMethod(new Random().nextDouble());
     }

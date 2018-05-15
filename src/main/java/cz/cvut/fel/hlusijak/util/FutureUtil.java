@@ -1,5 +1,6 @@
 package cz.cvut.fel.hlusijak.util;
 
+import cz.cvut.fel.hlusijak.simulator.SimulatorApplication;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
@@ -14,11 +15,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import cz.cvut.fel.hlusijak.simulator.SimulatorApplication;
-
-public class FutureUtil {
+/**
+ * Using Futures with JavaFX simultaneously is a pain.
+ * That's why this class exists.
+ */
+public final class FutureUtil {
     private static final ExecutorService BACKGROUND_EXECUTOR = Executors.newWorkStealingPool();
     private static final ExecutorService JFX_EXECUTOR = new JFXExecutor();
+
+    private FutureUtil() {
+        // Disable instantiation
+    }
 
     public static <T> CompletableFuture<T> futureTask(Supplier<T> supplier, ExecutorService executor) {
         // Decide whether to use JFX tasks or just regular futures, because JFX

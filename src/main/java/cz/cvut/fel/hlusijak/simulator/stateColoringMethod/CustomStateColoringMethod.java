@@ -14,11 +14,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Provides a way of manually specifying a color for each cell state of a {@link RuleSet}.
+ */
 public class CustomStateColoringMethod implements StateColoringMethod {
     private static final Paint PLACEHOLDER_COLOR = new RadialGradient(
             315, 1, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0, Color.MAGENTA), new Stop(1, Color.BLACK));
     private List<Paint> colors;
 
+    /**
+     * @param colors A list of colors for each cell state.
+     */
     public CustomStateColoringMethod(List<Paint> colors) {
         this.colors = Lists.newArrayList(colors);
     }

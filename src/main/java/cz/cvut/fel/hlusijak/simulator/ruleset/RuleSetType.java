@@ -6,6 +6,11 @@ import cz.cvut.fel.hlusijak.util.VariedUtil;
 
 import java.util.stream.Stream;
 
+/**
+ * Determines the total size of the rule set given a {@link GridGeometry} and
+ * the number of total states; provides a way to calculate the rule index from
+ * a given tile index.
+ */
 public interface RuleSetType {
     /**
      * @return The number of states.

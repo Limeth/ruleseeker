@@ -85,6 +85,9 @@ public class Simulator {
      * @return A conveniently informational {@link IterationResult}.
      */
     public synchronized CompletableFuture<IterationResult> nextIterationAsync() {
+        /*
+        Create final immutable instances of the previous iteration
+         */
         final Instant computationStart = Instant.now();
         final Grid previousGrid = grid.clone();
         final RuleSet currentRuleSet = ruleSet;
@@ -95,6 +98,9 @@ public class Simulator {
         //noinspection unchecked
         CompletableFuture<byte[]>[] tasks = new CompletableFuture[taskCount];
 
+        /*
+        Divide up the work to several tasks.
+         */
         for (int taskIndex = 0; taskIndex < taskCount; taskIndex += 1) {
             final int currentTaskIndex = taskIndex;
             final int currentCellsPerTask;
@@ -120,6 +126,9 @@ public class Simulator {
             tasks[taskIndex] = taskFuture;
         }
 
+        /*
+        Combine the results to a single Grid.
+         */
         Wrapper<Grid> nextGrid = new Wrapper<>(previousGrid.clone());
 
         Supplier<Integer> combine = () -> {

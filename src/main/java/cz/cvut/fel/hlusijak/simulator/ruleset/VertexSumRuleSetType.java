@@ -4,6 +4,11 @@ import cz.cvut.fel.hlusijak.simulator.grid.geometry.GridGeometry;
 
 import java.util.stream.IntStream;
 
+/**
+ * A rule set that assigns a rule for each combination of neighbouring tile states.
+ *
+ * Any cells sharing the vertices with the current cell are considered in the neighbourhood.
+ */
 public class VertexSumRuleSetType extends SumRuleSetType<GridGeometry> {
     public VertexSumRuleSetType(GridGeometry gridGeometry, byte states) {
         super(gridGeometry, states);

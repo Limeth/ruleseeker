@@ -29,6 +29,13 @@ public final class SerializationUtil {
     private static final int TYPE_INDEX_BASE_OTHER = 1 << 8;
     private static final int TYPE_INDEX_BASE_PRIMITIVE = 1 << 16;
 
+    private SerializationUtil() {
+        // Disable instantiation
+    }
+
+    /**
+     * Configures a {@link Kryo} instance.
+     */
     public static void register(Kryo kryo) {
         int typeIndex = TYPE_INDEX_BASE_PACKET;
 
@@ -62,6 +69,10 @@ public final class SerializationUtil {
         kryo.register(Vector2d.class, typeIndex++);
     }
 
+    /**
+     * @return A newly instantiated {@link Kryo} instance, preconfigured using
+     *         {@link #register(Kryo)}.
+     */
     public static Kryo constructKryo() {
         // Use Kryo defaults from Kryonet
         Kryo kryo = new KryoSerialization().getKryo();
@@ -71,6 +82,11 @@ public final class SerializationUtil {
         return kryo;
     }
 
+    /**
+     * @param path The path to get the file extension of.
+     * @return The parsed file extension, or {@code Optional.empty()}, if there
+     *         was none.
+     */
     public static Optional<String> getExtension(Path path) {
         String fileName = path.getFileName().toString();
         int i = fileName.lastIndexOf('.');

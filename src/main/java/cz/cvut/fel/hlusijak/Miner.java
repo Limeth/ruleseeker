@@ -13,6 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+/**
+ * A cellular automaton space miner. Given initial conditions, simulates random
+ * rule sets and yields those, which are satisfactory, given certain
+ * constraints.
+ */
 public class Miner {
     private static final Logger LOGGER = LoggerFactory.getLogger(Miner.class);
 
@@ -20,7 +25,7 @@ public class Miner {
     private Random rng;
     private AtomicInteger requestId = new AtomicInteger(0); // Used to detect whether the current request has been cancelled
 
-    private Simulator seed;
+    //private Simulator seed;
     private int minIterations;
     private int maxIterations;
 
@@ -28,13 +33,28 @@ public class Miner {
     private Simulator currentSimulator;
     private CompletableFuture<?> simulation;
 
+    /**
+     * @param resultConsumer Called whenever a rule set satisfying the
+     *                       conditions is found.
+     */
     public Miner(Consumer<RuleSet> resultConsumer) {
         this.resultConsumer = resultConsumer;
         this.rng = new Random();
     }
 
+    /**
+     * Begins a mining task.
+     *
+     * @param seed The initial conditions of the simulation.
+     * @param minIterations The minimum number of iterations until the
+     *                      simulation dies out to be accepted as satisfactory
+     * @param maxIterations The maximum number of iterations until the
+     *                      simulation dies out to be accepted as satisfactory
+     * @return A {@link CompletableFuture} that is yields when the task has
+     *         finished.
+     */
     public synchronized CompletableFuture<?> mine(Simulator seed, int minIterations, int maxIterations) {
-        this.seed = seed;
+        //this.seed = seed;
         this.minIterations = minIterations;
         this.maxIterations = maxIterations;
         currentSimulatorSeed = seed;
@@ -53,6 +73,9 @@ public class Miner {
         }
     }
 
+    /**
+     * Cancels the current mining task.
+     */
     public void cancel() {
         requestId.incrementAndGet();
     }

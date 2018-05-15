@@ -20,6 +20,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * The client component of the cellular automaton space miner.
+ * Connects to a {@link Master}, receives commands to work, searches for
+ * sufficient rule sets such that satisfy demands sent by the {@link Master}.
+ */
 public class Slave extends Listener implements Runnable {
     private static int RULE_SET_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(Slave.class);
@@ -35,11 +40,11 @@ public class Slave extends Listener implements Runnable {
         this.options = options;
     }
 
+    @Override
     public void run() {
         validateOptions();
 
         int port = Optional.ofNullable(options.masterPort).orElse(Network.SERVER_PORT_DEFAULT);
-        // TODO: might want to raise this to allow larger grids
         client = new Client(Network.BUFFER_SIZE, Network.BUFFER_SIZE);
 
         Network.register(client);

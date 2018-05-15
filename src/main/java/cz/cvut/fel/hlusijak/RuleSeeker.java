@@ -12,6 +12,10 @@ import javafx.application.Application;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * The entry point of the application. Here, the arguments are handled and it is
+ * determined whether to run the simulation interface or the CA space miner.
+ */
 public class RuleSeeker implements Runnable {
     private static RuleSeeker instance;
     private String[] rawArgs;
@@ -44,6 +48,10 @@ public class RuleSeeker implements Runnable {
         System.out.printf("-----------------------------------------------------------\n");
     }
 
+    /**
+     * @param simulator The new {@link Simulator} instance.
+     * @return The previous {@link Simulator} instance.
+     */
     public Simulator setSimulator(Simulator simulator) {
         Simulator prev = this.simulator;
         this.simulator = simulator;
@@ -51,10 +59,16 @@ public class RuleSeeker implements Runnable {
         return prev;
     }
 
+    /**
+     * @return The global {@link Simulator} instance, may be {@code null}.
+     */
     public Simulator getSimulator() {
         return simulator;
     }
 
+    /**
+     * If this method has been called, your Java Virtual Machine™ is probably working.
+     */
     public static void main(String[] rawArgs) {
         new RuleSeeker(rawArgs).run();
     }
@@ -97,18 +111,30 @@ public class RuleSeeker implements Runnable {
         Application.launch(SimulatorApplication.class, rawArgs);
     }
 
+    /**
+     * @return The one and only {@link RuleSeeker}. (Unless you've abused the reflection API)
+     */
     public static RuleSeeker getInstance() {
         return instance;
     }
 
+    /**
+     * @return The project's artifact id. (determined during compilation)
+     */
     public String getProjectArtifactId() {
         return this.projectArtifactId;
     }
 
+    /**
+     * @return The project version. (determined during compilation)
+     */
     public String getProjectVersion() {
         return this.projectVersion;
     }
 
+    /**
+     * @return The commit id. (determined during compilation)
+     */
     public String getGitCommitId() {
         return this.gitCommitId;
     }

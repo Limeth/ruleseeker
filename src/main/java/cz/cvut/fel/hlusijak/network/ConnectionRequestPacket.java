@@ -1,8 +1,16 @@
 package cz.cvut.fel.hlusijak.network;
 
+/**
+ * Direction: Slave -> Master
+ *
+ * A packet sent directly after establishing a TCP connection with the server.
+ */
 public class ConnectionRequestPacket implements Packet {
     private final String gitCommitId;
 
+    /**
+     * @param gitCommitId The slave's commit ID.
+     */
     public ConnectionRequestPacket(String gitCommitId) {
         this.gitCommitId = gitCommitId;
     }
@@ -12,6 +20,9 @@ public class ConnectionRequestPacket implements Packet {
         this(null);
     }
 
+    /**
+     * @return The slave's commit ID.
+     */
     public String getGitCommitId() {
         return gitCommitId;
     }

@@ -7,10 +7,19 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 
+/**
+ * A node used to draw a grid cell of a simulation in a JavaFX application.
+ */
 public class CellShape extends Polygon {
     private final SimulatorController simulatorController;
     private final int index;
 
+    /**
+     * @param simulatorController The {@link SimulatorController} used to access the currently selected state
+     * @param index The index of the grid cell
+     * @param state The initial state of the grid cell
+     * @param vertices Vertices of the grid cell
+     */
     public CellShape(SimulatorController simulatorController, int index, byte state, Vector2d... vertices) {
         super();
 
@@ -46,6 +55,11 @@ public class CellShape extends Polygon {
         updateColor(state);
     }
 
+    /**
+     * Replaces the vertices of this shape by those provided.
+     *
+     * @param vertices New shape vertices.
+     */
     public void updateShape(Vector2d... vertices) {
         getPoints().clear();
 
@@ -54,12 +68,18 @@ public class CellShape extends Polygon {
         }
     }
 
+    /**
+     * Refreshes the color of the shape.
+     */
     public void updateColor(byte state) {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 
         fillProperty().setValue(simulator.getStateColoringMethod().getColors(simulator.getRuleSet()).get(state));
     }
 
+    /**
+     * Fetches the current state and updates the color.
+     */
     public void updateColor() {
         Simulator simulator = RuleSeeker.getInstance().getSimulator();
 

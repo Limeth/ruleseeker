@@ -7,6 +7,9 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+/**
+ * A serializer for kryonet to serialize/deserialize JavaFX colors.
+ */
 public class ColorSerializer extends Serializer<Color> {
     public Color read(Kryo kryo, Input input, Class<Color> type) {
         return new Color(input.readDouble(), input.readDouble(), input.readDouble(), input.readDouble());

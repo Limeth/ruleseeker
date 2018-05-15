@@ -33,6 +33,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The server component of the cellular automaton space miner.
+ * Communicates with {@link Slave}s, dispatches initial configurations to them,
+ * aggregates results submitted by them.
+ */
 public class Master extends Listener implements Runnable {
     private static int GRID_CHUNK_MAX_LENGTH = Network.BUFFER_SIZE / 2;
     private static final Logger LOGGER = LoggerFactory.getLogger(Master.class);
@@ -40,14 +45,13 @@ public class Master extends Listener implements Runnable {
     private Server server;
     private Simulator seed; // Stores the initial state of the grid
     private Set<Connection> approvedConnections = Sets.newHashSet();
-
-    // TODO
     private int minIterations, maxIterations;
 
     public Master(CommandMaster options) {
         this.options = options;
     }
 
+    @Override
     public void run() {
         server = new Server(Network.BUFFER_SIZE, Network.BUFFER_SIZE);
 

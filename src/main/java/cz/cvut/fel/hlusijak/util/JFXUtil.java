@@ -24,6 +24,10 @@ import java.util.function.Supplier;
 public final class JFXUtil {
     private JFXUtil() {}
 
+    /**
+     * The JFX spinner doesn't work like you'd expect, that's fun.
+     * This function forces the spinner to update its value when it loses focus.
+     */
     public static void fixUnfocus(Spinner<?> spinner) {
         TextFormatter formatter = new TextFormatter(spinner.getValueFactory().getConverter(), spinner.getValueFactory().getValue());
 

@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * A rule set that assigns a rule for each combination of neighbouring tile states.
+ */
 public abstract class SumRuleSetType<G extends GridGeometry> implements RuleSetType {
     protected final G gridGeometry;
     protected final byte states;
@@ -32,7 +35,15 @@ public abstract class SumRuleSetType<G extends GridGeometry> implements RuleSetT
         this.ruleSetSize = 0;
     }
 
+    /**
+     * @return The total number of cells in the neighbourhood.
+     */
     public abstract int getNeighbourhoodSize();
+
+    /**
+     * @param tileIndex The index of the cell to get the stream of neighbours of.
+     * @return A stream of indices of the tiles neighbouring with the cell with the index {@param tileIndex}.
+     */
     public abstract IntStream neighbourhoodTileIndicesStream(int tileIndex);
 
     @Override
@@ -68,6 +79,10 @@ public abstract class SumRuleSetType<G extends GridGeometry> implements RuleSetT
         return state * this.neighbouringStateCombinations + combinationIndexWithRepetition(neighbouringStateCount);
     }
 
+    /**
+     * @param ruleSet The rule set of the simulation.
+     * @return A stream of the rules.
+     */
     public Stream<SumRuleRecord> enumerateRules(RuleSet ruleSet) {
         final int neighbourhoodSize = getNeighbourhoodSize();
 
