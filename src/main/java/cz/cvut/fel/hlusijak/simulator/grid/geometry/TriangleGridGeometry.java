@@ -95,7 +95,7 @@ public class TriangleGridGeometry extends AbstractRectangularGridGeometry {
 
     @Override
     public int getVertexNeighbourhoodSize() {
-        return 15;
+        return 12;
     }
 
     @Override

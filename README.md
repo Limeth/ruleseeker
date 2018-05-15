@@ -9,6 +9,12 @@ generate a `.jar` file in the `target` directory:
 mvn clean compile assembly:single
 ```
 
+Tests can be run using
+
+```
+mvn test
+```
+
 ## Usage
 To run the GUI simulator, just execute the JAR file with no arguments.
 
